@@ -311,10 +311,12 @@ rshares <- function(n, shares, sds = NULL,
 #'
 rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1E3) {
   var <- sds^2
-  undef_comb <- (shares * (1-shares)) < var
+  undef_comb <- (shares * (1-shares)) <= var # beta distribution is not defined
   if (!all(!undef_comb)) {
-    if (isTRUE(fix)) var[undef_comb] <- shares[undef_comb]^2
-    else stop('The beta distribution is not defined for the
+    if (isTRUE(fix)) {
+      var[undef_comb] <- (shares[undef_comb] * (1 - shares[undef_comb])) - 1E-1
+      #shares[undef_comb]^2
+    } else stop('The beta distribution is not defined for the
                                     parameter combination you provided!
                                     sd must be smaller or equal sqrt(shares*(1-shares))')
 
@@ -322,7 +324,6 @@ rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1E3) {
   # from: https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
   alpha <- shares * (((shares * (1-shares)) / var) - 1)
   beta <- (1-shares)*(((shares * (1-shares)) / var) - 1)
-
   k<- length(shares)
   x <- matrix(0, nrow = n, ncol = k)
   for (i in 1:k) {
