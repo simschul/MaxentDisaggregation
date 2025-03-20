@@ -18,8 +18,8 @@
 #'
 #' @examples
 rdisagg <- function(n, mean_0, sd_0 = NULL, min = 0, max = Inf,
-                    shares, sds = NULL) {
-  sample_agg <- ragg(n = n, mean = mean_0, sd = sd_0, min = min, max = max)
+                    shares, sds = NULL, log = FALSE) {
+  sample_agg <- ragg(n = n, mean = mean_0, sd = sd_0, min = min, max = max, log = log)
   sample_shares <- rshares(n = n, shares = shares, sds = sds)
   sample_disagg <- sample_shares * sample_agg
 
