@@ -250,24 +250,8 @@ rshares <- function(n, shares, sds = NULL,
     # Dirichlet with maxent fitted gamma
     sample <- rdir_maxent(n, shares)
   } else {
-    # partial info: nested approach
-    sample <- matrix(0, nrow = n, ncol = K)
-    colnames(sample) <- names(shares)
-
-    if (sum(have_both) > 0){
-      # sample all shares with both mean + sd
-      sample[, have_both] <- rbeta3(n, shares = shares[have_both],
-                                   sds = sds[have_both], max_iter = max_iter)
-    }
-
-    if (sum(have_mean_only) > 0) {
-      # rescale shares to sum to one
-      alpha2 <- shares[have_mean_only] / sum(shares[have_mean_only])
-      # sample all shares with mean only
-      sample_temp <- rdir_maxent(n, alpha2)
-      # rescale sample to make rows sum to one
-      sample[, have_mean_only] <- sample_temp * (1-rowSums(sample))
-    }
+    # partial info
+    stop("Please either provide positive numeric values for all elements in `sds` for for which you also provided positive numeric values for `shares`. Or provide no `sds` at all (can be also a vector of NA's). ")
   }
   return(sample)
 }
@@ -276,7 +260,8 @@ rshares <- function(n, shares, sds = NULL,
 # rshares(100, c(3,3,3)) %>% boxplot
 # rshares(100, c(0.1, 0.3, 0.6)) %>% boxplot
 # rshares(100, c(0.1, 0.3, 0.6), c(0.1, 0.01, 0.2)) %>% boxplot
-
+# rshares(100, shares = c(0.1, 0.3, 0.6), sds = c(0.1, 0.3, 0.003)) %>% boxplot
+# rshares(100, shares = c(NA, NA, 0.6), sds = c(NA, NA,0.1)) %>% boxplot
 
 
 #' Generate random numbers from the beta distribution. Similar to `base::rbeta`, but:
