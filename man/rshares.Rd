@@ -2,32 +2,60 @@
 % Please edit documentation in R/rshares.R
 \name{rshares}
 \alias{rshares}
-\title{Generate random shares based on the information provided.
-Samples alyways sum to 1.}
+\title{Generate random shares that always sum to 1}
 \usage{
 rshares(n, shares, sds = NULL, na_action = "fill", max_iter = 1000, ...)
 }
 \arguments{
-\item{n}{sample size}
+\item{n}{Integer. Sample size.}
 
-\item{shares}{vector containing a best-guess (mean) values for the shares. Can contain NA's if no information is available.}
+\item{shares}{Numeric vector containing a best-guess (mean) values for the shares.
+May contain \code{NA}, which is handled depending on \code{na_action}. Must sum to 1
+after adjustment.}
 
-\item{sds}{Vector of same length as \code{shares} containing the SDs of the shares. Can contain NA's if no information is available.}
+\item{sds}{Numeric vector (same length as \code{shares}) for the standard deviations of
+the shares. Can also contain \code{NA}.}
 
-\item{na_action}{what to do with NA's in the \code{shares} argument. "fill" (default) fills them proportional with the difference \code{1-sum(shares)}. "remove" removes them from the vector.}
+\item{na_action}{Character. Either \code{"fill"} (default) to fill \code{NA} shares
+proportionally, or \code{"remove"} to drop them entirely.}
 
-\item{max_iter}{see \code{?rbeta3}}
+\item{max_iter}{Numeric. Used by \code{\link[=rbeta3]{rbeta3()}} if partial Beta sampling is performed
+(not used here unless you modify the source).}
 
-\item{...}{other argeuments passed to \code{rbeta3}}
+\item{...}{Additional arguments passed on to \code{\link[=rbeta3]{rbeta3()}} or other internal functions.}
+}
+\value{
+A numeric matrix of dimension \code{n} times \code{length(shares)}, with
+each row summing to 1.
 }
 \description{
-Compared to generalised Dirichlet the function can handle mixed information,
-e.g. SDs/means only for some of the shares.
+This function combines different approaches for generating shares (Dirichlet,
+Generalised Dirichlet, Beta) in a single workflow, depending on the information
+provided by \code{shares} and \code{sds}. All generated vectors sum to 1.
 }
 \details{
-The function uses a nested sampling approach:
+The logic is:
 \enumerate{
-\item sample those shares for which both, mean and SD is available (either from generalised Dirichlet \code{dirg()} if mean and sd are given for ALL shares, or from beta distiributions \code{rbeta3()} when mean and sd are only given for some shares.)
-\item sample reminder from standard dirichlet with gamma fitted to MaxEnt (\code{rdir_maxent})
+\item If both mean and SD are available for \strong{all} shares, use \code{\link[=rdir_generalised]{rdir_generalised()}}.
+\item If only mean values (no SDs) are available for \strong{all} shares, use \code{\link[=rdir_maxent]{rdir_maxent()}}.
+\item Otherwise, throw an error if partial information is present (e.g., some but not all
+SDs are defined).
 }
+
+By default, if \code{na_action} is "fill", any \code{NA} in \code{shares} is replaced
+proportionally so that the new \code{shares} still sum to 1. If \code{na_action} is "remove",
+elements with \code{NA} are dropped.
+}
+\examples{
+# Example with no SDs -> uses rdir_maxent
+rshares(5, c(0.1, 0.3, 0.6))
+
+# Example with means & SDs for all -> uses rdir_generalised
+rshares(5, c(0.1, 0.3, 0.6), c(0.05, 0.07, 0.02))
+
+# 'na_action' example: fill missing shares to sum to 1
+rshares(5, c(NA, 0.2, 0.3), c(NA, 0.04, 0.05), na_action = "fill")
+}
+\seealso{
+\code{\link[=rdir_generalised]{rdir_generalised()}}, \code{\link[=rdir_maxent]{rdir_maxent()}}, \code{\link[=rbeta3]{rbeta3()}}
 }

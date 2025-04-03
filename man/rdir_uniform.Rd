@@ -2,22 +2,32 @@
 % Please edit documentation in R/rshares.R
 \name{rdir_uniform}
 \alias{rdir_uniform}
-\title{Generate uniform random number from a Dirichlet distribution.
-Uniform means each alpha is 1:https://en.wikipedia.org/wiki/Dirichlet_distribution#When_each_alpha_is_1}
+\title{Generate uniform random numbers from a Dirichlet distribution}
 \usage{
 rdir_uniform(n, length, names = NULL)
 }
 \arguments{
-\item{n}{number of samples}
+\item{n}{Integer. Number of random vectors to generate.}
 
-\item{length}{the number of variables}
+\item{length}{Integer. The number of variables (columns) in the output.}
 
-\item{names}{optional: a character vector of length \code{length} used as column names for the output sample}
+\item{names}{Optional character vector of length \code{length} giving column names.}
 }
 \value{
-a matrix with n rows and \code{length} cols, each containing a single Dirichlet random deviate
+A numeric matrix of dimension \code{n} times \code{length}, with each row
+a Dirichlet random deviate drawn from a uniform (each \eqn{\alpha=1}) distribution.
 }
 \description{
-Generate uniform random number from a Dirichlet distribution.
-Uniform means each alpha is 1:https://en.wikipedia.org/wiki/Dirichlet_distribution#When_each_alpha_is_1
+Generates random vectors from a Dirichlet distribution with each \eqn{\alpha = 1}.
+This implies a uniform distribution over the simplex.
+}
+\details{
+For details, see
+\href{https://en.wikipedia.org/wiki/Dirichlet_distribution#When_each_alpha_is_1}{Wikipedia on the Dirichlet distribution}.
+}
+\examples{
+rdir_uniform(5, 3)
+}
+\seealso{
+\code{\link[=rdirichlet_standard]{rdirichlet_standard()}}
 }

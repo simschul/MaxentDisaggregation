@@ -2,20 +2,37 @@
 % Please edit documentation in R/rshares.R
 \name{rdir_generalised}
 \alias{rdir_generalised}
-\title{Generate uniform random number from a Generalised Dirichlet distribution.}
+\title{Generate random numbers from a Generalised Dirichlet distribution}
 \usage{
 rdir_generalised(n, shares, sds)
 }
 \arguments{
-\item{n}{sample size}
+\item{n}{Integer. Number of random vectors to generate.}
 
-\item{shares}{Vector containing a best-guess (mean) values for the shares. Must sum to 1!}
+\item{shares}{Numeric vector of best-guess (mean) values for the shares. Must sum to 1.}
 
-\item{sds}{Vector of same length as \code{shares} containing the SDs of the shares.}
+\item{sds}{Numeric vector (same length as \code{shares}) containing the standard
+deviations of the shares.}
+}
+\value{
+A numeric matrix of dimension \code{n} times \code{length(shares)}, with each
+row a single Generalised Dirichlet random deviate.
 }
 \description{
-Generate uniform random number from a Generalised Dirichlet distribution.
+Generates random vectors from a Generalised Dirichlet distribution using the mean
+(\code{shares}) and standard deviations (\code{sds}) of each component. The shape and rate
+parameters (\eqn{\alpha_2} and \eqn{\beta_2}) are derived from the provided means
+and SDs, following the approach of Plessis et al. (2010).
+}
+\examples{
+rdir_generalised(5, c(0.2, 0.3, 0.5), c(0.05, 0.07, 0.06))
 }
 \references{
-Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot. “Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks: The Case of Dissociative Recombinations.” The Journal of Chemical Physics 133, no. 13 (October 7, 2010): 134110. https://doi.org/10.1063/1.3479907.
+Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot.
+"Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks:
+The Case of Dissociative Recombinations." \emph{The Journal of Chemical Physics} 133, no. 13 (2010): 134110.
+\doi{10.1063/1.3479907}
+}
+\seealso{
+\code{\link[=rgamma]{rgamma()}}, \code{\link[=rdirichlet]{rdirichlet()}}
 }

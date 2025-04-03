@@ -2,22 +2,34 @@
 % Please edit documentation in R/rshares.R
 \name{rdir_maxent}
 \alias{rdir_maxent}
-\title{Generate random numbers from Dirichlet distribution. The concenctration parameter
-$\gamma$ (or sometimes also noted $\alpha_0$) is estimated based on the
-the maximum entropy principle.}
+\title{Generate random numbers from a Dirichlet distribution via Maximum Entropy}
 \usage{
 rdir_maxent(n, shares, ...)
 }
 \arguments{
-\item{n}{number of samples}
+\item{n}{Integer. Number of random vectors to generate.}
 
-\item{shares}{Vector containing a best-guess (mean) values for the shares. Must sum to 1!}
+\item{shares}{Numeric vector. A best-guess (mean) of the shares. Must sum to 1.}
 
-\item{...}{other parameters passed to \code{find_gamma_maxent}}
+\item{...}{Other parameters passed on to \code{\link[=find_gamma_maxent]{find_gamma_maxent()}}.}
 }
 \value{
-a matrix with n rows and length(shares) cols, each containing a single Dirichlet random deviate
+A numeric matrix of dimension \code{n} times \code{length(shares)}, where
+each row is a random deviate from the Dirichlet distribution.
 }
 \description{
-See: \code{?find_gamma_maxent2}
+This function estimates the concentration parameter \eqn{\gamma} (sometimes noted
+\eqn{\alpha_0}) by applying the maximum entropy principle via
+\code{\link[=find_gamma_maxent]{find_gamma_maxent()}}. The resulting parameter is then used to generate random
+vectors from a Dirichlet distribution.
+}
+\details{
+For details on how \eqn{\gamma} is fitted, see \code{\link[=find_gamma_maxent2]{find_gamma_maxent2()}} or the
+references therein. The entropy is evaluated using \code{\link[=dirichlet_entropy]{dirichlet_entropy()}}.
+}
+\examples{
+rdir_maxent(5, c(0.2, 0.3, 0.5))
+}
+\seealso{
+\code{\link[=find_gamma_maxent]{find_gamma_maxent()}}, \code{\link[=dirichlet_entropy]{dirichlet_entropy()}}, \code{\link[=rdirichlet_standard]{rdirichlet_standard()}}
 }

@@ -2,37 +2,43 @@
 % Please edit documentation in R/rshares.R
 \name{rbeta3}
 \alias{rbeta3}
-\title{Generate random numbers from the beta distribution. Similar to \code{base::rbeta}, but:
-\itemize{
-\item vectorized
-\item parametrised with mean and sd (derived from: https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance)
-\item Ensures that the sum of the samples do not exceed 1.
-}}
+\title{Generate random numbers from the Beta distribution via mean and SD}
 \usage{
 rbeta3(n, shares, sds, fix = TRUE, max_iter = 1000)
 }
 \arguments{
-\item{n}{number of samples}
+\item{n}{Integer. Number of samples to generate.}
 
-\item{shares}{a vector of shares (between 0 and 1, sum(means) <= 1)}
+\item{shares}{Numeric vector of means (between 0 and 1). Must satisfy \code{sum(shares) <= 1}.}
 
-\item{sds}{vector of standard devaitions of the shares.}
+\item{sds}{Numeric vector of standard deviations of the same length as \code{shares}.}
 
-\item{fix}{if set to TRUE (default) the SD of all variables for which the
-parameter combination of shares and sd is undedefined ((shares * (1-shares)) < sd^2).
-If set to FALSE the function will throw an error message if there are undefined
-parameter combinations.}
+\item{fix}{Logical. If \code{TRUE} (default), any undefined parameter combinations
+(where \eqn{\mathrm{sd}^2 > \mu(1-\mu)}) are reset to a slightly smaller
+variance to make them valid. If \code{FALSE}, an error is thrown.}
 
-\item{max_iter}{the maximum number of iterations to sample.}
+\item{max_iter}{Integer. Maximum number of re-sampling iterations allowed when
+discarding samples whose row-sum is > 1.}
+}
+\value{
+A numeric matrix of size \code{n} times \code{length(shares)}. Each row
+has \eqn{\sum_i x_i \leq 1}, but they do not necessarily sum exactly to 1.
 }
 \description{
-It is similar to a generalised Dirichlet, however the main functional difference
-is that the samples do NOT sum to 1 (but are <= 1).
+This function is similar to \code{\link[base:rbeta]{base::rbeta()}}, but vectorized and parametrized
+directly in terms of mean and standard deviation. It also ensures that the sum
+of sampled values across variables does not exceed 1 by discarding and
+re-sampling any draws whose row-sum is > 1. Depending on the parameter
+configuration, this can be computationally expensive.
 }
 \details{
-The constraint that the sample sum is <= 1 is currently achieved by sampling
-as long until \code{n} samples exist that satisfy the constraint. Depending on the
-parameter combination this can be quite computational intensive.
-
-Note that the beta distribution is only defined if (mean * (1-mean)) < sd^2
+The Beta distribution is only well-defined if \eqn{\mathrm{Var}(X) \leq \mu(1-\mu)},
+i.e., if \eqn{\mathrm{sd}(X)^2 \leq \mu(1-\mu)}.
+}
+\examples{
+# Means that sum to less than 1
+rbeta3(5, c(0.2, 0.3, 0.4), c(0.05, 0.04, 0.03))
+}
+\seealso{
+\code{\link[stats:Beta]{stats::rbeta()}}
 }

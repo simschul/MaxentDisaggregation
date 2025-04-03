@@ -2,20 +2,34 @@
 % Please edit documentation in R/rshares.R
 \name{rdirichlet_standard}
 \alias{rdirichlet_standard}
-\title{Functions to generate random deviates from the Dirichlet distribution.}
+\title{Generate random numbers from a Dirichlet distribution (standard parametrization)}
 \usage{
 rdirichlet_standard(n, alpha, threshold = 0.01)
 }
 \arguments{
-\item{threshold}{}
+\item{n}{Integer. Number of random vectors to generate.}
+
+\item{alpha}{Numeric vector of shape parameters.}
+
+\item{threshold}{Numeric. Threshold below which fallback parameters are used.
+Defaults to \code{1e-2}.}
+}
+\value{
+A numeric matrix of dimension \code{n} times \code{length(alpha)}, with
+each row a Dirichlet random deviate.
 }
 \description{
-Like \code{gtools::rdirichlet}, but with an adjustment when \code{alpha} contains small
-values below a given \code{threshold}.
+Similar to \code{\link[gtools:dirichlet]{gtools::rdirichlet()}}, but when \eqn{\alpha_i} is below \code{threshold},
+a fallback parametrization is used to avoid zero or near-zero outcomes.
 }
 \details{
-Basically the same as \code{rdirichlet}, but keeping the parametrisation of \code{gtools::rdirichlet}
-to allow easy switching between the two.
-
-Details see \code{?rdirichlet}.
+This function keeps the standard Dirichlet parametrization (\eqn{\alpha_i}) but
+adjusts small \eqn{\alpha_i} to 1 and uses \eqn{rate = 1/\alpha_i} for the
+underlying Gamma draws. For details, see \code{\link[=rdirichlet]{rdirichlet()}}.
+}
+\examples{
+rdirichlet_standard(5, c(0.1, 0.1, 0.8))
+}
+\seealso{
+\code{\link[gtools:dirichlet]{gtools::rdirichlet()}}, \code{\link[=rdirichlet]{rdirichlet()}}
 }

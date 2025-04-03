@@ -2,43 +2,47 @@
 % Please edit documentation in R/rshares.R
 \name{rdirichlet}
 \alias{rdirichlet}
-\title{Create Random Dirichlet distributed numbers.}
+\title{Generate random numbers from a Dirichlet distribution (adjusted for small alpha)}
 \usage{
 rdirichlet(n, shares, gamma, threshold = 0.01)
 }
 \arguments{
-\item{shares}{vector containing a best-guess (mean) values for the shares. Must sum to 1!}
+\item{n}{Integer. Sample size.}
 
-\item{threshold}{}
+\item{shares}{Numeric vector of best-guess (mean) values for the shares. Must sum to 1.}
+
+\item{gamma}{Numeric. Concentration parameter (\eqn{\gamma}).}
+
+\item{threshold}{Numeric. All values in \code{shares} multiplied by \code{gamma}
+that are below this threshold use the fallback parametrization (default: \code{1e-2}).}
+}
+\value{
+A numeric matrix of dimension \code{n} times \code{length(shares)}, with
+each row a single Dirichlet random deviate.
 }
 \description{
-Adds the gamma parameter compared to the standard Dir variant.
-For all variables \code{i} with shares below \code{threshold}, the \code{rate} argument of
-the \code{rgamma} functions is set to \code{1 / shares[i]}, and \code{shape} is set \code{1}.
-This ensures less extreme values
-for those variables which presumably originate from the know issues of
-generating random gamma distributed number with a very small \code{shape} parameter.
+Extends a standard Dirichlet random generator by adding a concentration parameter
+(\eqn{\gamma}). For each variable \eqn{i} whose mean value (\eqn{\alpha_i = \gamma \cdot share_i})
+is below a specified \code{threshold}, a fallback parametrization of the Gamma distribution
+is applied to avoid zero or near-zero sampling. This is especially useful for very
+small shape parameters, which can cause numerical issues in \code{\link[=rgamma]{rgamma()}}.
 }
 \details{
-The reason for setting rate and shape parameters for small alphas like this is the following:
-The gamma distribution (similar to the beta distribution), generates well behaved
-random numbers only if the variables SD is not greater than the MEAN.
-The gamma distribution can also be parametrised by a mean and sd using the
-following relation between mean/sd and the shape and rate parameters:
+This pragmatic workaround sets:
 \itemize{
-\item \eqn{rate = \frac{\mu}{\sigma^2}}
-\item \eqn{shape = (\frac{\mu}{\sigma})^2}
+\item \eqn{\alpha_i = 1} (shape) for shares below \code{threshold}
+\item \eqn{rate = 1 / \alpha_i}
 }
 
-(derived from: https://en.wikipedia.org/wiki/Gamma_distribution#Mean_and_variance)
+ensuring less extreme values.
 
-See \code{?rgamma}: "Note that for smallish values of shape (and moderate scale) a
-large parts of the mass of the Gamma distribution is on values of x so
-near zero that they will be represented as zero in computer arithmetic.
-So rgamma may well return values which will be represented as zero."
-
-Note: the current implementation is rather a pragmatic workaround for this
-issue. Both the threshold parameter and the formula to set the \code{rate} parameter
-are somehow arbitrarily chosen. However, since only variables with a very small
-mean are affected this shouldn't affect overall results too much.
+For more details, see the discussion in \code{\link[=rgamma]{rgamma()}} under "small shape values" and
+the references there. This approach helps mitigate issues where numeric precision
+can push small Gamma-distributed values to zero.
+}
+\examples{
+rdirichlet(5, c(0.2, 0.3, 0.5), gamma = 10, threshold = 1e-2)
+}
+\seealso{
+\code{\link[=rdirichlet_standard]{rdirichlet_standard()}}, \code{\link[=rgamma]{rgamma()}}
 }
