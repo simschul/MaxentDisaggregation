@@ -277,7 +277,7 @@ rshares <- function(n, shares, sds = NULL,
 
 #' Generate random numbers from the Beta distribution via mean and SD
 #'
-#' This function is similar to [base::rbeta()], but vectorized and parametrized
+#' This function is similar to [stats::rbeta()], but vectorized and parametrized
 #' directly in terms of mean and standard deviation. It also ensures that the sum
 #' of sampled values across variables does not exceed 1 by discarding and
 #' re-sampling any draws whose row-sum is > 1. Depending on the parameter

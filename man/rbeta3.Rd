@@ -25,7 +25,7 @@ A numeric matrix of size \code{n} times \code{length(shares)}. Each row
 has \eqn{\sum_i x_i \leq 1}, but they do not necessarily sum exactly to 1.
 }
 \description{
-This function is similar to \code{\link[base:rbeta]{base::rbeta()}}, but vectorized and parametrized
+This function is similar to \code{\link[stats:Beta]{stats::rbeta()}}, but vectorized and parametrized
 directly in terms of mean and standard deviation. It also ensures that the sum
 of sampled values across variables does not exceed 1 by discarding and
 re-sampling any draws whose row-sum is > 1. Depending on the parameter
