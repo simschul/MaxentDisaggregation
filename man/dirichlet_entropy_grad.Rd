@@ -3,7 +3,7 @@
 \name{dirichlet_entropy_grad}
 \alias{dirichlet_entropy_grad}
 \title{Derivative of the Dirichlet entropy function.
-Derivated using the `Deriv` package and `autodiffr`.
+Derivated using the \code{Deriv} package and \code{autodiffr}.
 For derivation see script:}
 \usage{
 dirichlet_entropy_grad(x, shares)

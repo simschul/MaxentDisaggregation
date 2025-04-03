@@ -12,13 +12,13 @@ rshares(n, shares, sds = NULL, na_action = "fill", max_iter = 1000, ...)
 
 \item{shares}{vector containing a best-guess (mean) values for the shares. Can contain NA's if no information is available.}
 
-\item{sds}{Vector of same length as `shares` containing the SDs of the shares. Can contain NA's if no information is available.}
+\item{sds}{Vector of same length as \code{shares} containing the SDs of the shares. Can contain NA's if no information is available.}
 
-\item{na_action}{what to do with NA's in the `shares` argument. "fill" (default) fills them proportional with the difference `1-sum(shares)`. "remove" removes them from the vector.}
+\item{na_action}{what to do with NA's in the \code{shares} argument. "fill" (default) fills them proportional with the difference \code{1-sum(shares)}. "remove" removes them from the vector.}
 
-\item{max_iter}{see `?rbeta3`}
+\item{max_iter}{see \code{?rbeta3}}
 
-\item{...}{other argeuments passed to `rbeta3`}
+\item{...}{other argeuments passed to \code{rbeta3}}
 }
 \description{
 Compared to generalised Dirichlet the function can handle mixed information,
@@ -26,6 +26,8 @@ e.g. SDs/means only for some of the shares.
 }
 \details{
 The function uses a nested sampling approach:
-1. sample those shares for which both, mean and SD is available (either from generalised Dirichlet `dirg()` if mean and sd are given for ALL shares, or from beta distiributions `rbeta3()` when mean and sd are only given for some shares.)
-2. sample reminder from standard dirichlet with gamma fitted to MaxEnt (`rdir_maxent`)
+\enumerate{
+\item sample those shares for which both, mean and SD is available (either from generalised Dirichlet \code{dirg()} if mean and sd are given for ALL shares, or from beta distiributions \code{rbeta3()} when mean and sd are only given for some shares.)
+\item sample reminder from standard dirichlet with gamma fitted to MaxEnt (\code{rdir_maxent})
+}
 }

@@ -10,5 +10,5 @@ beta2(alpha)
 \item{alpha}{a non-negative numeric vector}
 }
 \description{
-A generalization of the base `beta` function with any number of variables
+A generalization of the base \code{beta} function with any number of variables
 }

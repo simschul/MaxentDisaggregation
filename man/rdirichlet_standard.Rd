@@ -10,12 +10,12 @@ rdirichlet_standard(n, alpha, threshold = 0.01)
 \item{threshold}{}
 }
 \description{
-Like `gtools::rdirichlet`, but with an adjustment when `alpha` contains small
-values below a given `threshold`.
+Like \code{gtools::rdirichlet}, but with an adjustment when \code{alpha} contains small
+values below a given \code{threshold}.
 }
 \details{
-Basically the same as `rdirichlet`, but keeping the parametrisation of `gtools::rdirichlet`
+Basically the same as \code{rdirichlet}, but keeping the parametrisation of \code{gtools::rdirichlet}
 to allow easy switching between the two.
 
-Details see `?rdirichlet`.
+Details see \code{?rdirichlet}.
 }

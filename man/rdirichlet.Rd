@@ -2,13 +2,7 @@
 % Please edit documentation in R/rshares.R
 \name{rdirichlet}
 \alias{rdirichlet}
-\title{Create Random Dirichlet distributed numbers.
-Adds the gamma parameter compared to the standard Dir variant.
-For all variables `i` with shares below `threshold`, the `rate` argument of
-the `rgamma` functions is set to `1 / shares[i]`, and `shape` is set `1`.
-This ensures less extreme values
-for those variables which presumably originate from the know issues of
-generating random gamma distributed number with a very small `shape` parameter.}
+\title{Create Random Dirichlet distributed numbers.}
 \usage{
 rdirichlet(n, shares, gamma, threshold = 0.01)
 }
@@ -18,25 +12,33 @@ rdirichlet(n, shares, gamma, threshold = 0.01)
 \item{threshold}{}
 }
 \description{
+Adds the gamma parameter compared to the standard Dir variant.
+For all variables \code{i} with shares below \code{threshold}, the \code{rate} argument of
+the \code{rgamma} functions is set to \code{1 / shares[i]}, and \code{shape} is set \code{1}.
+This ensures less extreme values
+for those variables which presumably originate from the know issues of
+generating random gamma distributed number with a very small \code{shape} parameter.
+}
+\details{
 The reason for setting rate and shape parameters for small alphas like this is the following:
 The gamma distribution (similar to the beta distribution), generates well behaved
 random numbers only if the variables SD is not greater than the MEAN.
 The gamma distribution can also be parametrised by a mean and sd using the
 following relation between mean/sd and the shape and rate parameters:
-$$
-rate = \frac{\mu}{\sigma^2} \\
-shape = (\frac{\mu}{\sigma})^2
-$$
-(derived from: https://en.wikipedia.org/wiki/Gamma_distribution#Mean_and_variance)
+\itemize{
+\item \eqn{rate = \frac{\mu}{\sigma^2}}
+\item \eqn{shape = (\frac{\mu}{\sigma})^2}
 }
-\details{
-See `?rgamma`: "Note that for smallish values of shape (and moderate scale) a
+
+(derived from: https://en.wikipedia.org/wiki/Gamma_distribution#Mean_and_variance)
+
+See \code{?rgamma}: "Note that for smallish values of shape (and moderate scale) a
 large parts of the mass of the Gamma distribution is on values of x so
 near zero that they will be represented as zero in computer arithmetic.
 So rgamma may well return values which will be represented as zero."
 
 Note: the current implementation is rather a pragmatic workaround for this
-issue. Both the threshold parameter and the formula to set the `rate` parameter
+issue. Both the threshold parameter and the formula to set the \code{rate} parameter
 are somehow arbitrarily chosen. However, since only variables with a very small
 mean are affected this shouldn't affect overall results too much.
 }

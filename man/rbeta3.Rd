@@ -2,10 +2,12 @@
 % Please edit documentation in R/rshares.R
 \name{rbeta3}
 \alias{rbeta3}
-\title{Generate random numbers from the beta distribution. Similar to `base::rbeta`, but:
-- vectorized
-- parametrised with mean and sd (derived from: https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance)
-- Ensures that the sum of the samples do not exceed 1.}
+\title{Generate random numbers from the beta distribution. Similar to \code{base::rbeta}, but:
+\itemize{
+\item vectorized
+\item parametrised with mean and sd (derived from: https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance)
+\item Ensures that the sum of the samples do not exceed 1.
+}}
 \usage{
 rbeta3(n, shares, sds, fix = TRUE, max_iter = 1000)
 }
@@ -29,7 +31,7 @@ is that the samples do NOT sum to 1 (but are <= 1).
 }
 \details{
 The constraint that the sample sum is <= 1 is currently achieved by sampling
-as long until `n` samples exist that satisfy the constraint. Depending on the
+as long until \code{n} samples exist that satisfy the constraint. Depending on the
 parameter combination this can be quite computational intensive.
 
 Note that the beta distribution is only defined if (mean * (1-mean)) < sd^2

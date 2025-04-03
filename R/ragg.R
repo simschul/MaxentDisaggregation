@@ -12,10 +12,12 @@
 #' @examples
 ragg <- function(n, mean, sd = NULL, min = 0, max = Inf, meanlog = NULL, sdlog = NULL,
                  log = FALSE) {
+
+  #TODO: check mean, sd other args
   if (!is.null(mean) & !is.null(sd) & min == -Inf & max == Inf & isFALSE(log)) {
     # Normal distribution
     rnorm(n, mean, sd)
-  } else if (!is.null(mean) & !is.null(sd) & min == -Inf & max == Inf & isTRUE(log)) {
+  } else if (!is.null(mean) & !is.null(sd) & min <= 0 & max == Inf & isTRUE(log)) {
     # Lognormal distribution
     rlnorm2(n, mean, sd)
   } else if (!is.null(mean) & !is.null(sd)) {

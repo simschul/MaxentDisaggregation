@@ -11,7 +11,7 @@ rdir_generalised(n, shares, sds)
 
 \item{shares}{Vector containing a best-guess (mean) values for the shares. Must sum to 1!}
 
-\item{sds}{Vector of same length as `shares` containing the SDs of the shares.}
+\item{sds}{Vector of same length as \code{shares} containing the SDs of the shares.}
 }
 \description{
 Generate uniform random number from a Generalised Dirichlet distribution.

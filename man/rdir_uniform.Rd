@@ -12,10 +12,10 @@ rdir_uniform(n, length, names = NULL)
 
 \item{length}{the number of variables}
 
-\item{names}{optional: a character vector of length `length` used as column names for the output sample}
+\item{names}{optional: a character vector of length \code{length} used as column names for the output sample}
 }
 \value{
-a matrix with n rows and `length` cols, each containing a single Dirichlet random deviate
+a matrix with n rows and \code{length} cols, each containing a single Dirichlet random deviate
 }
 \description{
 Generate uniform random number from a Dirichlet distribution.

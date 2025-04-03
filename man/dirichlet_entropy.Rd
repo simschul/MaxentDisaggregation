@@ -12,6 +12,6 @@ dirichlet_entropy(x, shares)
 \item{shares}{the shares (must sum to 1)}
 }
 \description{
-calculates the negative entropy of a dirichlet distribution given `shares` (sum to 1) and a concentration parameter `x`, so that `alpha = shares * x`
+calculates the negative entropy of a dirichlet distribution given \code{shares} (sum to 1) and a concentration parameter \code{x}, so that \code{alpha = shares * x}
 from:  https://en.wikipedia.org/wiki/Dirichlet_distribution#Entropy
 }

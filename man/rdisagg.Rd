@@ -26,7 +26,7 @@ rdisagg(
 
 \item{max}{the upper boundary}
 
-\item{shares}{best guesses for the shares (need to sum to one unless they contain NA's). See `?rshares`}
+\item{shares}{best guesses for the shares (need to sum to one unless they contain NA's). See \code{?rshares}}
 
 \item{sds}{standard deviations of the shares (can contain NA). Set to NULL (default) if none available.}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ragg.R
 \name{rlnorm2}
 \alias{rlnorm2}
-\title{Random number generation for the lognormal distribution parameterised to the `mean` and `sd` on the **linear** scale.
+\title{Random number generation for the lognormal distribution parameterised to the \code{mean} and \code{sd} on the \strong{linear} scale.
 Taken from: https://stackoverflow.com/questions/56821688/sample-a-lognormal-distribution-to-an-exact-mean-and-sd}
 \usage{
 rlnorm2(n, mean, sd)
@@ -13,6 +13,6 @@ rlnorm2(n, mean, sd)
 \item{sd}{the standard deviation on the linear scale}
 }
 \description{
-Random number generation for the lognormal distribution parameterised to the `mean` and `sd` on the **linear** scale.
+Random number generation for the lognormal distribution parameterised to the \code{mean} and \code{sd} on the \strong{linear} scale.
 Taken from: https://stackoverflow.com/questions/56821688/sample-a-lognormal-distribution-to-an-exact-mean-and-sd
 }

@@ -3,7 +3,7 @@
 \name{find_gamma_maxent}
 \alias{find_gamma_maxent}
 \title{Finds the Gamma value which maximises the entropy of a Dirichlet distribution
-with given alphas (=sector shares), using the nloptr optimazation package.}
+with given alphas (=shares), using the nloptr optimazation package.}
 \usage{
 find_gamma_maxent(
   shares,
@@ -18,13 +18,23 @@ find_gamma_maxent(
 )
 }
 \arguments{
-\item{x0}{initial value. If not defined by dirichlet_entropy and/or eval_grad_f there is a automatical procedure to find a valid initial value within the `bounds`. If none is found, the `shares_lb` arguments is used to remove all shares below that threshold (default is 0)}
+\item{shares}{a vector of positive reals which sum to 1}
+
+\item{eval_f}{function that returns the value of the objective function (the entropy function of the dirichlet distribution)}
+
+\item{x0}{initial value. If not defined by dirichlet_entropy and/or eval_grad_f there is a automatical procedure to find a valid initial value within the \code{bounds}. If none is found, the \code{shares_lb} arguments is used to remove all shares below that threshold (default is 0)}
+
+\item{x0_n_tries}{number of tries to find an initial value of gamma, default: 100}
+
+\item{bounds}{a vector of size 2 giving lower and upper bounds, default: \code{c(0.001, 172)}}
 
 \item{shares_lb}{lower bound of shares. Only is of relevance if no starting value x0 could found be which is defined by dirichlet_entropy and/or eval_grad_f. set this to e.g. 1E-4) to increase chance of convergence}
 
-\item{opts}{}
+\item{local_opts}{see \code{?nloptr}}
+
+\item{opts}{passed to \code{nloptr}, check out \code{?nloptr}}
 }
 \description{
-~~BUT: including the first derivative of the Dir Entropy function `dirichlet_entropy_grad`,
-and thus is **much** faster than `find_gamma_maxent`.~~
+Finds the Gamma value which maximises the entropy of a Dirichlet distribution
+with given alphas (=shares), using the nloptr optimazation package.
 }

@@ -13,11 +13,11 @@ rdir_maxent(n, shares, ...)
 
 \item{shares}{Vector containing a best-guess (mean) values for the shares. Must sum to 1!}
 
-\item{...}{other parameters passed to `find_gamma_maxent`}
+\item{...}{other parameters passed to \code{find_gamma_maxent}}
 }
 \value{
 a matrix with n rows and length(shares) cols, each containing a single Dirichlet random deviate
 }
 \description{
-See: `?find_gamma_maxent2`
+See: \code{?find_gamma_maxent2}
 }

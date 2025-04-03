@@ -4,7 +4,7 @@
 #'
 #' See: `?find_gamma_maxent2`
 #'
-#' @param n number of samples
+#' @param n Number of random vectors to generate
 #' @param shares Vector containing a best-guess (mean) values for the shares. Must sum to 1!
 #' @param ... other parameters passed to `find_gamma_maxent`
 #'
@@ -25,7 +25,7 @@ rdir_maxent <- function(n, shares, ...) {
 #' Uniform means each alpha is 1:https://en.wikipedia.org/wiki/Dirichlet_distribution#When_each_alpha_is_1
 #'
 #'
-#' @param n number of samples
+#' @param n Number of random vectors to generate
 #' @param length the number of variables
 #' @param names optional: a character vector of length `length` used as column names for the output sample
 #'
@@ -43,7 +43,7 @@ rdir_uniform <- function(n, length, names = NULL) {
 
 #' Generate uniform random number from a Generalised Dirichlet distribution.
 #'
-#' @param n sample size
+#' @param n Number of random vectors to generate
 #' @param shares Vector containing a best-guess (mean) values for the shares. Must sum to 1!
 #' @param sds Vector of same length as `shares` containing the SDs of the shares.
 #'
@@ -74,6 +74,7 @@ rdir_generalised <- function(n, shares, sds) {
 
 
 #' Create Random Dirichlet distributed numbers.
+#'
 #' Adds the gamma parameter compared to the standard Dir variant.
 #' For all variables `i` with shares below `threshold`, the `rate` argument of
 #' the `rgamma` functions is set to `1 / shares[i]`, and `shape` is set `1`.
@@ -86,10 +87,11 @@ rdir_generalised <- function(n, shares, sds) {
 #' random numbers only if the variables SD is not greater than the MEAN.
 #' The gamma distribution can also be parametrised by a mean and sd using the
 #' following relation between mean/sd and the shape and rate parameters:
-#' $$
-#' rate = \frac{\mu}{\sigma^2} \\
-#' shape = (\frac{\mu}{\sigma})^2
-#' $$
+#' \itemize{
+#' \item \eqn{rate = \frac{\mu}{\sigma^2}}
+#' \item \eqn{shape = (\frac{\mu}{\sigma})^2}
+#'}
+#'
 #' (derived from: https://en.wikipedia.org/wiki/Gamma_distribution#Mean_and_variance)
 #'
 #'
@@ -103,10 +105,10 @@ rdir_generalised <- function(n, shares, sds) {
 #' are somehow arbitrarily chosen. However, since only variables with a very small
 #' mean are affected this shouldn't affect overall results too much.
 #'
-#' @param n
+#' @param n sample size
 #' @param shares vector containing a best-guess (mean) values for the shares. Must sum to 1!
-#' @param gamma
-#' @param threshold
+#' @param gamma concentration parameter
+#' @param threshold all values in `shares` below that `threshold` are excluded when finding the MaxEnt value for `gamma` (because of numerical issues with the underlying gamma distribution, see `Details`)
 #'
 #' @return
 #' @export
