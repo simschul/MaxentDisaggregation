@@ -57,7 +57,7 @@ dirichlet_entropy <- function(x, shares) {
 }
 
 
-#' Like `find_gamma_maxent`: Finds the Gamma value which maximises the entropy of a Dirichlet distribution
+#' Finds the Gamma value which maximises the entropy of a Dirichlet distribution
 #' with given alphas (=sector shares), using the nloptr optimazation package.
 #'
 #' ~~BUT: including the first derivative of the Dir Entropy function `dirichlet_entropy_grad`,
@@ -76,7 +76,7 @@ dirichlet_entropy <- function(x, shares) {
 #' @export
 #'
 #' @examples
-find_gamma_maxent2 <- function(shares,
+find_gamma_maxent <- function(shares,
                                eval_f = eval_f,
                                #eval_grad_f = dirichlet_entropy_grad,
                                x0 = 1, # initial value of gamma

@@ -8,32 +8,21 @@ test_that("rdir_maxent returns a matrix with correct dimensions and column names
   expect_equal(colnames(result), names(shares))
 })
 
-test_that("rdir1 returns a matrix with correct dimensions", {
+test_that("rdir_uniform returns a matrix with correct dimensions", {
   length <- 3
   n <- 10
-  result <- rdir1(n, length, names = letters[1:length])
+  result <- rdir_uniform(n, length, names = letters[1:length])
   expect_true(is.matrix(result))
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length)
   expect_equal(colnames(result), letters[1:length])
 })
 
-test_that("rdirg returns a matrix with correct dimensions and column names", {
+test_that("rdir_generalised returns a matrix with correct dimensions and column names", {
   shares <- c(a = 0.2, b = 0.3, c = 0.5)
   sds <- c(a = 0.1, b = 0.1, c = 0.1)
   n <- 10
-  result <- rdirg(n, shares, sds)
-  expect_true(is.matrix(result))
-  expect_equal(nrow(result), n)
-  expect_equal(ncol(result), length(shares))
-  expect_equal(colnames(result), names(shares))
-})
-
-test_that("rdir returns a matrix with correct dimensions and column names", {
-  shares <- c(a = 0.2, b = 0.3, c = 0.5)
-  gamma <- 2
-  n <- 10
-  result <- rdir(n, shares, gamma)
+  result <- rdir_generalised(n, shares, sds)
   expect_true(is.matrix(result))
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length(shares))
@@ -41,9 +30,20 @@ test_that("rdir returns a matrix with correct dimensions and column names", {
 })
 
 test_that("rdirichlet returns a matrix with correct dimensions and column names", {
+  shares <- c(a = 0.2, b = 0.3, c = 0.5)
+  gamma <- 2
+  n <- 10
+  result <- rdirichlet(n, shares, gamma)
+  expect_true(is.matrix(result))
+  expect_equal(nrow(result), n)
+  expect_equal(ncol(result), length(shares))
+  expect_equal(colnames(result), names(shares))
+})
+
+test_that("rdirichlet_standard returns a matrix with correct dimensions and column names", {
   alpha <- c(a = 1, b = 1, c = 1)
   n <- 10
-  result <- rdirichlet(n, alpha)
+  result <- rdirichlet_standard(n, alpha)
   expect_true(is.matrix(result))
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length(alpha))

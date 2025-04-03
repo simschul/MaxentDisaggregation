@@ -6,16 +6,15 @@
 #'
 #' @param n number of samples
 #' @param shares Vector containing a best-guess (mean) values for the shares. Must sum to 1!
-#' @param ... other parameters passed to `find_gamma_maxent2`
+#' @param ... other parameters passed to `find_gamma_maxent`
 #'
-#' @return a matrix with n rows and length(shares) cols, each containting a single Dirichlet random deviate
+#' @return a matrix with n rows and length(shares) cols, each containing a single Dirichlet random deviate
 #' @export
 #'
 #' @examples
 rdir_maxent <- function(n, shares, ...) {
-  out <- find_gamma_maxent2(shares, eval_f = dirichlet_entropy, ...)
-  #sample <- gtools::rdirichlet(N, shares * out$solution)
-  sample <- rdir(n, shares = shares, gamma = out$solution)
+  out <- find_gamma_maxent(shares, eval_f = dirichlet_entropy, ...)
+  sample <- rdirichlet(n, shares = shares, gamma = out$solution)
   colnames(sample) <- names(shares)
   return(sample)
 }
@@ -34,22 +33,13 @@ rdir_maxent <- function(n, shares, ...) {
 #' @export
 #'
 #' @examples
-rdir1 <- function(n, length, names = NULL) {
-  sample <- rdirichlet(n, rep(1, length))
+rdir_uniform <- function(n, length, names = NULL) {
+  sample <- rdirichlet_standard(n, rep(1, length))
   colnames(sample) <- names
   return(sample)
 }
 
-# rgdir <- function(n, mu, u) {
-#   alpha <- (mu / u) ^ 2
-#   beta <- mu / (u) ^ 2
-#   k <- length(alpha)
-#   x <- matrix(0, nrow = n, ncol = k)
-#   for (i in 1:k) {
-#     x[, i] <- rgamma(n, shape = alpha[i], rate = beta[i])
-#   }
-#   return(x / rowSums(x))
-# }
+
 
 #' Generate uniform random number from a Generalised Dirichlet distribution.
 #'
@@ -63,7 +53,7 @@ rdir1 <- function(n, length, names = NULL) {
 #' @export
 #'
 #' @examples
-rdirg <- function(n, shares, sds) {
+rdir_generalised <- function(n, shares, sds) {
 
   if (!isTRUE(all.equal(names(shares), names(sds)))) {
     stop('shares and sds need to have the same column names. can also be both NULL')
@@ -81,26 +71,11 @@ rdirg <- function(n, shares, sds) {
   return(sample)
 }
 
-#' Random Dirichlet distributed numbers.
-#' Adds the gamma parameter compared to the standard Dir variant.
-#' @param n
-#' @param shares vector containing a best-guess (mean) values for the shares. Must sum to 1!
-#' @param gamma
-#'
-#' @return
-#' @export
-#'
-#' #' @examples
-#' rdir <- function(n, shares, gamma) {
-#'   sample <- gtools::rdirichlet(n, shares * gamma)
-#'   colnames(sample) <- names(shares)
-#'   return(sample)
-#'
-#' }
+
 
 #' Create Random Dirichlet distributed numbers.
 #' Adds the gamma parameter compared to the standard Dir variant.
-#' For all variables `i` with an shares below that threshold, the `rate` argument of
+#' For all variables `i` with shares below `threshold`, the `rate` argument of
 #' the `rgamma` functions is set to `1 / shares[i]`, and `shape` is set `1`.
 #' This ensures less extreme values
 #' for those variables which presumably originate from the know issues of
@@ -137,7 +112,7 @@ rdirg <- function(n, shares, sds) {
 #' @export
 #'
 #' @examples
-rdir <- function(n, shares, gamma, threshold = 1E-2) {
+rdirichlet <- function(n, shares, gamma, threshold = 1E-2) {
   alpha <- gamma * shares
   l <- length(alpha)
   rate <- rep(1, l)
@@ -157,10 +132,10 @@ rdir <- function(n, shares, gamma, threshold = 1E-2) {
 #' Like `gtools::rdirichlet`, but with an adjustment when `alpha` contains small
 #' values below a given `threshold`.
 #'
-#' Basically the same as `rdir`, but keeping the parametrisation of `gtools::rdirichlet`
+#' Basically the same as `rdirichlet`, but keeping the parametrisation of `gtools::rdirichlet`
 #' to allow easy switching between the two.
 #'
-#' Details see `?rdir`.
+#' Details see `?rdirichlet`.
 #'
 #' @param n
 #' @param alpha
@@ -170,7 +145,7 @@ rdir <- function(n, shares, gamma, threshold = 1E-2) {
 #' @export
 #'
 #' @examples
-rdirichlet <- function(n, alpha, threshold = 1E-2) {
+rdirichlet_standard <- function(n, alpha, threshold = 1E-2) {
   l <- length(alpha)
   rate <- rep(1, l)
   rate[alpha < threshold] <- 1 / alpha[alpha < threshold]
@@ -183,20 +158,7 @@ rdirichlet <- function(n, alpha, threshold = 1E-2) {
 }
 
 
-# rshares <- function(N, alpha, beta = NULL) {
-#   if (isTRUE(all.equal(var(alpha), 0)) & is.null(beta)) {
-#     # Dirichlet 1
-#     rdir1(N, length = length(alpha))
-#   } else if (is.null(beta)) {
-#     # Dirichlet MaxEnt
-#     rdir_maxent(N, alpha)
-#   } else if (!is.null(beta)) {
-#     # Gen. Dirichlet
-#     rdirg(N, alpha, beta)
-#   } else {
-#     stop('Case not implemented atm.')
-#   }
-# }
+
 
 #' Generate random shares based on the information provided.
 #' Samples alyways sum to 1.
@@ -245,7 +207,7 @@ rshares <- function(n, shares, sds = NULL,
 
   if (all(have_both)) {
     # Generalised dirichlet
-    sample <- rdirg(n, shares, sds)
+    sample <- rdir_generalised(n, shares, sds)
   } else if (all(have_mean_only)) {
     # Dirichlet with maxent fitted gamma
     sample <- rdir_maxent(n, shares)

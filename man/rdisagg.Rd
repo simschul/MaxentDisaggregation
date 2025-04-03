@@ -4,7 +4,16 @@
 \alias{rdisagg}
 \title{Generate random disaggregates}
 \usage{
-rdisagg(n, mean_0, sd_0 = NULL, min = 0, max = Inf, shares, sds = NULL)
+rdisagg(
+  n,
+  mean_0,
+  sd_0 = NULL,
+  min = 0,
+  max = Inf,
+  shares,
+  sds = NULL,
+  log = FALSE
+)
 }
 \arguments{
 \item{n}{sample size}

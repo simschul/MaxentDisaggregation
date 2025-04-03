@@ -59,6 +59,6 @@ shares <- c(i01.b = 0.000684264991660737, i01.c = 0.000516544213909967,
 
 
 test_that("finding maxent gamma works", {
-  expect_no_error(find_gamma_maxent2(shares, eval_f = dirichlet_entropy, shares_lb = 1E-3))
-  expect_error(find_gamma_maxent2(c(0.1, 0.4, 0.2), eval_f = dirichlet_entropy))
+  expect_no_error(find_gamma_maxent(shares, eval_f = dirichlet_entropy, shares_lb = 1E-3))
+  expect_error(find_gamma_maxent(c(0.1, 0.4, 0.2), eval_f = dirichlet_entropy))
 })

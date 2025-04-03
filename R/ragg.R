@@ -1,4 +1,4 @@
-#' Title
+#'
 #'
 #' @param n
 #' @param mean
