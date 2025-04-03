@@ -2,12 +2,11 @@
 % Please edit documentation in R/dir_maxent.R
 \name{find_gamma_maxent}
 \alias{find_gamma_maxent}
-\title{Finds the Gamma value which maximises the entropy of a Dirichlet distribution
-with given alphas (=shares), using the nloptr optimazation package.}
+\title{Find the \eqn{\gamma} that Maximizes Dirichlet Entropy}
 \usage{
 find_gamma_maxent(
   shares,
-  eval_f = eval_f,
+  eval_f = dirichlet_entropy,
   x0 = 1,
   x0_n_tries = 100,
   bounds = c(0.001, 172),
@@ -18,23 +17,54 @@ find_gamma_maxent(
 )
 }
 \arguments{
-\item{shares}{a vector of positive reals which sum to 1}
+\item{shares}{Numeric vector of positive reals that sum to 1.}
 
-\item{eval_f}{function that returns the value of the objective function (the entropy function of the dirichlet distribution)}
+\item{eval_f}{Function that returns the value of the objective (by default, the
+negative Dirichlet entropy). Must accept \code{x} (the \eqn{\gamma} parameter) and
+\code{shares}.}
 
-\item{x0}{initial value. If not defined by dirichlet_entropy and/or eval_grad_f there is a automatical procedure to find a valid initial value within the \code{bounds}. If none is found, the \code{shares_lb} arguments is used to remove all shares below that threshold (default is 0)}
+\item{x0}{Numeric. Initial guess for \eqn{\gamma}. Defaults to \code{1}.}
 
-\item{x0_n_tries}{number of tries to find an initial value of gamma, default: 100}
+\item{x0_n_tries}{Integer. Number of attempts to find a valid initial \code{x0} if
+the objective is non-finite at the current guess. Defaults to \code{100}.}
 
-\item{bounds}{a vector of size 2 giving lower and upper bounds, default: \code{c(0.001, 172)}}
+\item{bounds}{Numeric vector of length 2 giving lower and upper bounds on \eqn{\gamma}.
+Defaults to \code{c(0.001, 172)}.}
 
-\item{shares_lb}{lower bound of shares. Only is of relevance if no starting value x0 could found be which is defined by dirichlet_entropy and/or eval_grad_f. set this to e.g. 1E-4) to increase chance of convergence}
+\item{shares_lb}{Numeric. Lower bound for shares. Any share below this threshold
+is removed and the remaining shares are re-scaled to sum to 1. Defaults to \code{0}.}
 
-\item{local_opts}{see \code{?nloptr}}
+\item{local_opts}{List of local optimization options passed to \code{\link[=nloptr]{nloptr()}}.
+Defaults to \code{list("algorithm"="NLOPT_LD_MMA","xtol_rel"=1.0e-4)}.}
 
-\item{opts}{passed to \code{nloptr}, check out \code{?nloptr}}
+\item{opts}{List of global optimization options for \code{\link[=nloptr]{nloptr()}}. Defaults to
+\code{list("algorithm"="NLOPT_GN_DIRECT","xtol_rel"=1.0e-4,"maxeval"=1000,"local_opts"=local_opts,"print_level"=0)}.}
+}
+\value{
+An object of class \code{nloptr}, containing (among other components):
+\itemize{
+\item \code{solution}: The best-fit \eqn{\gamma} that maximizes the Dirichlet entropy.
+\item \code{objective}: The value of the objective function at that solution.
+}
 }
 \description{
-Finds the Gamma value which maximises the entropy of a Dirichlet distribution
-with given alphas (=shares), using the nloptr optimazation package.
+Uses numerical optimization via the \strong{nloptr} package to find the concentration
+parameter \eqn{\gamma} that maximizes the entropy of a Dirichlet distribution
+given a vector of shares. Internally, it calls \code{\link[=dirichlet_entropy]{dirichlet_entropy()}} or a
+user-specified function for the objective.
+}
+\details{
+If the chosen \code{x0} (initial guess) leads to non-finite objective values, random
+attempts are made to find a valid starting value. If no valid starting point is
+found after \code{x0_n_tries}, shares below \code{shares_lb} are excluded and re-scaled
+until a valid configuration is found or the function errors out.
+}
+\examples{
+# Simple usage with default objective = dirichlet_entropy
+sol <- find_gamma_maxent(c(0.2, 0.3, 0.5))
+sol$solution     # Optimal gamma
+sol$objective    # The maximum negative entropy
+}
+\seealso{
+\code{\link[nloptr:nloptr]{nloptr::nloptr()}}, \code{\link[=dirichlet_entropy]{dirichlet_entropy()}}
 }

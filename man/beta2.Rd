@@ -2,13 +2,24 @@
 % Please edit documentation in R/dir_maxent.R
 \name{beta2}
 \alias{beta2}
-\title{Generalized beta function}
+\title{Generalized Beta Function for Multiple Arguments}
 \usage{
 beta2(alpha)
 }
 \arguments{
-\item{alpha}{a non-negative numeric vector}
+\item{alpha}{A non-negative numeric vector of parameters.}
+}
+\value{
+A single numeric value, the generalized Beta function of the \code{alpha} vector.
 }
 \description{
-A generalization of the base \code{beta} function with any number of variables
+Extends the usual two-argument Beta function to multiple arguments, i.e.,
+\eqn{B(\alpha_1, \ldots, \alpha_k) = \frac{\prod_i \Gamma(\alpha_i)}{\Gamma(\sum_i \alpha_i)}}.
+}
+\examples{
+# Example with a 3-argument vector:
+beta2(c(1, 2, 3))
+}
+\seealso{
+\code{\link[base:Special]{base::beta()}}, \code{\link[=gamma]{gamma()}}
 }

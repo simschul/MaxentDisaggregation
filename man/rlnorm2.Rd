@@ -2,17 +2,45 @@
 % Please edit documentation in R/ragg.R
 \name{rlnorm2}
 \alias{rlnorm2}
-\title{Random number generation for the lognormal distribution parameterised to the \code{mean} and \code{sd} on the \strong{linear} scale.
-Taken from: https://stackoverflow.com/questions/56821688/sample-a-lognormal-distribution-to-an-exact-mean-and-sd}
+\title{Lognormal Random Number Generation with Mean and SD on the Linear Scale}
 \usage{
 rlnorm2(n, mean, sd)
 }
 \arguments{
-\item{mean}{the mean on the linear scale}
+\item{n}{Integer. Number of random values to generate.}
 
-\item{sd}{the standard deviation on the linear scale}
+\item{mean}{Numeric. The mean of the desired distribution on the linear scale (must be > 0).}
+
+\item{sd}{Numeric. The standard deviation of the desired distribution on the linear scale.}
+}
+\value{
+A numeric vector of length \code{n}, containing lognormal random deviates.
 }
 \description{
-Random number generation for the lognormal distribution parameterised to the \code{mean} and \code{sd} on the \strong{linear} scale.
-Taken from: https://stackoverflow.com/questions/56821688/sample-a-lognormal-distribution-to-an-exact-mean-and-sd
+Generates lognormal random values with a specified mean and standard deviation
+given on the \emph{linear} scale. Internally, this is done by converting the linear-scale
+mean and SD to the appropriate log-scale parameters for \code{\link[=rlnorm]{rlnorm()}}.
+}
+\details{
+This approach is based on the relationship:
+
+\deqn{
+  m_2 = \log\!\bigl(\frac{\mu^2}{\sqrt{\sigma^2 + \mu^2}}\bigr), \quad
+  s_2 = \sqrt{\log\!\bigl(1 + \frac{\sigma^2}{\mu^2}\bigr)},
+}
+
+where \eqn{\mu} is the mean (linear scale) and \eqn{\sigma} the SD (linear scale),
+while \eqn{m_2} and \eqn{s_2} are the mean and SD on the \emph{log scale}.
+}
+\examples{
+# Generate lognormal samples with mean=1, sd=0.3 (on linear scale)
+set.seed(123)
+x <- rlnorm2(10, mean = 1, sd = 0.3)
+summary(x)
+}
+\references{
+This parameterization is discussed in \href{https://stackoverflow.com/questions/56821688}{this StackOverflow post}.
+}
+\seealso{
+\code{\link[=rlnorm]{rlnorm()}}, \code{\link[=ragg]{ragg()}}
 }

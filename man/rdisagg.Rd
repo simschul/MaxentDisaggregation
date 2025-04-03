@@ -2,7 +2,7 @@
 % Please edit documentation in R/rdisagg.R
 \name{rdisagg}
 \alias{rdisagg}
-\title{Generate random disaggregates}
+\title{Generate Random Disaggregates}
 \usage{
 rdisagg(
   n,
@@ -16,23 +16,54 @@ rdisagg(
 )
 }
 \arguments{
-\item{n}{sample size}
+\item{n}{Integer. Sample size (number of random draws).}
 
-\item{mean_0}{the best guess of the aggregate}
+\item{mean_0}{Numeric. The best guess (mean) of the aggregate on the \emph{linear} scale
+unless \code{log = TRUE}.}
 
-\item{sd_0}{the standard deviation of the aggregate}
+\item{sd_0}{Numeric. The standard deviation of the aggregate on the linear scale
+unless \code{log = TRUE}. Defaults to \code{NULL}.}
 
-\item{min}{the lower boundary}
+\item{min}{Numeric. Lower boundary for the aggregate distribution. Defaults to \code{0}.}
 
-\item{max}{the upper boundary}
+\item{max}{Numeric. Upper boundary for the aggregate distribution. Defaults to \code{Inf}.}
 
-\item{shares}{best guesses for the shares (need to sum to one unless they contain NA's). See \code{?rshares}}
+\item{shares}{Numeric vector of best-guess shares. Must sum to 1 if no \code{NA}
+values are present. See \code{\link[=rshares]{rshares()}} for details.}
 
-\item{sds}{standard deviations of the shares (can contain NA). Set to NULL (default) if none available.}
+\item{sds}{Numeric vector of standard deviations for the shares, or \code{NULL} if none
+are available (default).}
+
+\item{log}{Logical. If \code{TRUE}, the aggregate distribution will be sampled in log-space
+(lognormal or truncated lognormal, etc.) depending on the parameters. Defaults to \code{FALSE}.}
+}
+\value{
+A numeric matrix of size \code{n} times \code{length(shares)}, where each row
+sums to the corresponding entry in the aggregate sample. Specifically, each row
+is the element-wise product of the sampled aggregate (scalar in each row) and
+the sampled shares (vector in each row).
 }
 \description{
-Creates a random sample of disaggregates based on the information provided.
-The aggregate and the shares are sampled independently. The distribution
-from which to sample is determined internally based on the information
-provided by the user.
+Creates a random sample of disaggregates based on user-specified information
+about the total aggregate and the shares. Internally, it first samples
+the aggregate (via \code{\link[=ragg]{ragg()}}) and then samples the shares (via \code{\link[=rshares]{rshares()}}).
+The final output is the element-wise product of these two samples.
+}
+\examples{
+# Example 1: Simple exponential aggregate, uniform shares
+set.seed(123)
+agg_mean <- 100
+n_samples <- 5
+shares_vec <- c(0.3, 0.4, 0.3)
+
+rdisagg(n = n_samples, mean_0 = agg_mean, shares = shares_vec)
+
+# Example 2: Normal aggregate, Dirichlet shares w/ MaxEnt
+rdisagg(n = 5, mean_0 = 100, sd_0 = 10, shares = c(0.1, 0.2, 0.7))
+}
+\seealso{
+\itemize{
+\item \code{\link[=ragg]{ragg()}} for details on how the aggregate sample is generated.
+\item \code{\link[=rshares]{rshares()}} for details on how the shares sample is generated.
+}
 }

@@ -22,7 +22,8 @@ each row a single Dirichlet random deviate.
 }
 \description{
 Extends a standard Dirichlet random generator by adding a concentration parameter
-(\eqn{\gamma}). For each variable \eqn{i} whose mean value (\eqn{\alpha_i = \gamma \cdot share_i})
+(\eqn{\gamma}).
+For each variable \eqn{i} whose mean value (\eqn{\alpha_i = \gamma \cdot share_i})
 is below a specified \code{threshold}, a fallback parametrization of the Gamma distribution
 is applied to avoid zero or near-zero sampling. This is especially useful for very
 small shape parameters, which can cause numerical issues in \code{\link[=rgamma]{rgamma()}}.

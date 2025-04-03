@@ -2,16 +2,35 @@
 % Please edit documentation in R/dir_maxent.R
 \name{dirichlet_entropy}
 \alias{dirichlet_entropy}
-\title{Dirichlet entropy function}
+\title{Dirichlet Entropy (Negative) for Given Shares and Concentration}
 \usage{
 dirichlet_entropy(x, shares)
 }
 \arguments{
-\item{x}{value of the concentration parameter (gamma)}
+\item{x}{Numeric. The concentration parameter (\eqn{\gamma}).}
 
-\item{shares}{the shares (must sum to 1)}
+\item{shares}{Numeric vector of shares (must sum to 1).}
+}
+\value{
+A single numeric value: the negative of the Dirichlet entropy.
 }
 \description{
-calculates the negative entropy of a dirichlet distribution given \code{shares} (sum to 1) and a concentration parameter \code{x}, so that \code{alpha = shares * x}
-from:  https://en.wikipedia.org/wiki/Dirichlet_distribution#Entropy
+Calculates the (negative) entropy of a Dirichlet distribution parameterized by
+\code{shares * x}. The formula is from
+\href{https://en.wikipedia.org/wiki/Dirichlet_distribution#Entropy}{Wikipedia}:
+}
+\details{
+\deqn{
+  -\Bigl[\ln B(\alpha) + (\alpha_0 - K)\psi(\alpha_0) - \sum_{i=1}^{K}(\alpha_i - 1)\psi(\alpha_i)\Bigr]
+}
+
+where \eqn{\alpha_i = x \cdot \mathrm{shares}[i]},
+\eqn{\alpha_0 = \sum_i \alpha_i}, and \eqn{B(\alpha)} is the
+generalized Beta function (\code{\link[=beta2]{beta2()}}).
+}
+\examples{
+dirichlet_entropy(x = 10, shares = c(0.2, 0.3, 0.5))
+}
+\seealso{
+\code{\link[=beta2]{beta2()}}, \code{\link[=digamma]{digamma()}}, \code{\link[=dirichlet_entropy_grad]{dirichlet_entropy_grad()}}
 }
