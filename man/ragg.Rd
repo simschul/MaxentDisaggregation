@@ -6,7 +6,7 @@
 \usage{
 ragg(
   n,
-  mean,
+  mean = NULL,
   sd = NULL,
   min = 0,
   max = Inf,
