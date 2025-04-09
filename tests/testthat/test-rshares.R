@@ -1,28 +1,28 @@
-test_that("rdir_maxent returns a matrix with correct dimensions and column names", {
+test_that("rdirichlet_maxent returns a matrix with correct dimensions and column names", {
   shares <- c(a = 0.2, b = 0.3, c = 0.5)
   n <- 10
-  result <- rdir_maxent(n, shares)
+  result <- rdirichlet_maxent(n, shares)
   expect_true(is.matrix(result))
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length(shares))
   expect_equal(colnames(result), names(shares))
 })
 
-test_that("rdir_uniform returns a matrix with correct dimensions", {
+test_that("rdirichlet_uniform returns a matrix with correct dimensions", {
   length <- 3
   n <- 10
-  result <- rdir_uniform(n, length, names = letters[1:length])
+  result <- rdirichlet_uniform(n, length, names = letters[1:length])
   expect_true(is.matrix(result))
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length)
   expect_equal(colnames(result), letters[1:length])
 })
 
-test_that("rdir_generalised returns a matrix with correct dimensions and column names", {
+test_that("rdirichlet_generalised returns a matrix with correct dimensions and column names", {
   shares <- c(a = 0.2, b = 0.3, c = 0.5)
   sds <- c(a = 0.1, b = 0.1, c = 0.1)
   n <- 10
-  result <- rdir_generalised(n, shares, sds)
+  result <- rdirichlet_generalised(n, shares, sds)
   expect_true(is.matrix(result))
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length(shares))

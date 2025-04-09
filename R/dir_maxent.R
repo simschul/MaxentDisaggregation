@@ -10,7 +10,7 @@
 #'
 #' @param x Numeric value (scalar). Concentration parameter (sometimes called \eqn{\gamma}).
 #' @param shares Numeric vector of shares that sum to 1.
-#'
+#' @export
 #' @return A numeric value corresponding to the (tentative) derivative of the
 #'   Dirichlet entropy function evaluated at \eqn{x} with given \code{shares}.
 #'

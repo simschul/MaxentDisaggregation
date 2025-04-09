@@ -5,7 +5,7 @@
 #' [find_gamma_maxent()]. The resulting parameter is then used to generate random
 #' vectors from a Dirichlet distribution.
 #'
-#' For details on how \eqn{\gamma} is fitted, see [find_gamma_maxent2()] or the
+#' For details on how \eqn{\gamma} is fitted, see [find_gamma_maxent()] or the
 #' references therein. The entropy is evaluated using [dirichlet_entropy()].
 #'
 #' @param n Integer. Number of random vectors to generate.
@@ -19,8 +19,8 @@
 #' @export
 #'
 #' @examples
-#' rdir_maxent(5, c(0.2, 0.3, 0.5))
-rdir_maxent <- function(n, shares, ...) {
+#' rdirichlet_maxent(5, c(0.2, 0.3, 0.5))
+rdirichlet_maxent <- function(n, shares, ...) {
   out <- find_gamma_maxent(shares, eval_f = dirichlet_entropy, ...)
   sample <- rdirichlet(n, shares = shares, gamma = out$solution)
   colnames(sample) <- names(shares)
@@ -47,8 +47,8 @@ rdir_maxent <- function(n, shares, ...) {
 #' @export
 #'
 #' @examples
-#' rdir_uniform(5, 3)
-rdir_uniform <- function(n, length, names = NULL) {
+#' rdirichlet_uniform(5, 3)
+rdirichlet_uniform <- function(n, length, names = NULL) {
   sample <- rdirichlet_standard(n, rep(1, length))
   colnames(sample) <- names
   return(sample)
@@ -80,8 +80,8 @@ rdir_uniform <- function(n, length, names = NULL) {
 #' @export
 #'
 #' @examples
-#' rdir_generalised(5, c(0.2, 0.3, 0.5), c(0.05, 0.07, 0.06))
-rdir_generalised <- function(n, shares, sds) {
+#' rdirichlet_generalised(5, c(0.2, 0.3, 0.5), c(0.05, 0.07, 0.06))
+rdirichlet_generalised <- function(n, shares, sds) {
   if (!isTRUE(all.equal(names(shares), names(sds)))) {
     stop("`shares` and `sds` must have the same names. They can also both be NULL.")
   }
@@ -194,14 +194,16 @@ rdirichlet_standard <- function(n, alpha, threshold = 1e-2) {
 #'
 #' The logic is:
 #'
-#' 1. If both mean and SD are available for **all** shares, use [rdir_generalised()].
-#' 2. If only mean values (no SDs) are available for **all** shares, use [rdir_maxent()].
-#' 3. Otherwise, throw an error if partial information is present (e.g., some but not all
-#'    SDs are defined).
-#'
-#' By default, if `na_action` is "fill", any \code{NA} in `shares` is replaced
+#' 1. If both mean and SD are available for **all** shares, use [rdirichlet_generalised()].
+#' 2. If only mean values (no SDs) are available for **all** shares, use [rdirichlet_maxent()].
+#' 3. If partial information in the mean values is present (i.e. there are \code{NA}'s in `shares`)
+#' the output depends on `na_action`: By default, if `na_action` is "fill", any \code{NA} in `shares` is replaced
 #' proportionally so that the new `shares` still sum to 1. If `na_action` is "remove",
 #' elements with \code{NA} are dropped.
+#' 4. Otherwise, throw an error if partial information is present (e.g., some but not all
+#'    SDs are defined).
+#'
+#'
 #'
 #' @param n Integer. Sample size.
 #' @param shares Numeric vector containing a best-guess (mean) values for the shares.
@@ -218,18 +220,18 @@ rdirichlet_standard <- function(n, alpha, threshold = 1e-2) {
 #' @return A numeric matrix of dimension \code{n} times \code{length(shares)}, with
 #'   each row summing to 1.
 #'
-#' @seealso [rdir_generalised()], [rdir_maxent()], [rbeta3()]
+#' @seealso [rdirichlet_generalised()], [rdirichlet_maxent()], [rbeta3()]
 #' @export
 #'
 #' @examples
-#' # Example with no SDs -> uses rdir_maxent
+#' # Example with no SDs -> uses rdirichlet_maxent
 #' rshares(5, c(0.1, 0.3, 0.6))
 #'
-#' # Example with means & SDs for all -> uses rdir_generalised
+#' # Example with means & SDs for all -> uses rdirichlet_generalised
 #' rshares(5, c(0.1, 0.3, 0.6), c(0.05, 0.07, 0.02))
 #'
 #' # 'na_action' example: fill missing shares to sum to 1
-#' rshares(5, c(NA, 0.2, 0.3), c(NA, 0.04, 0.05), na_action = "fill")
+#' rshares(5, c(NA, 0.2, 0.3) , na_action = "fill")
 rshares <- function(n, shares, sds = NULL,
                     na_action = "fill", max_iter = 1e3, ...) {
 
@@ -257,10 +259,10 @@ rshares <- function(n, shares, sds = NULL,
 
   if (all(have_both)) {
     # All shares have corresponding SDs: use generalised Dirichlet
-    sample <- rdir_generalised(n, shares, sds)
+    sample <- rdirichlet_generalised(n, shares, sds)
   } else if (all(have_mean_only)) {
     # All shares have means, no SDs: use Dirichlet with maxent for gamma
-    sample <- rdir_maxent(n, shares)
+    sample <- rdirichlet_maxent(n, shares)
   } else {
     stop(
       paste0(
