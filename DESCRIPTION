@@ -14,5 +14,8 @@ BugReports: https://github.com/simschul/disaggR/issues
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr
