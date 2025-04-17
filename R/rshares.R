@@ -62,16 +62,31 @@ rdirichlet_uniform <- function(n, length, names = NULL) {
 #' parameters (\eqn{\alpha_2} and \eqn{\beta_2}) are derived from the provided means
 #' and SDs, following the approach of Plessis et al. (2010).
 #'
+#' Please note that unrealistic combinations of `shares` and `sds`, in particular
+#' components with `sds/shares > 0.5`, might result in biased samples.
+#' Against this background, after the draw, the function checks the sample mean of every
+#' component against the target share.  If the *relative bias*
+#' \deqn{\text{bias}_i = \frac{\bar x_i - \mu_i}{\mu_i}}
+#' exceeds `max_rel_bias`, a warning is issued.
+#' If you really think that the uncertainty of your `shares` is very high
+#' (in the order of a coefficient of variation of 0.5 or more), consider using
+#' the Maximum Entropy Dirichlet distribution instead by setting `sds=NULL` (the default).
+#' This way the uncertainties are fitted such that they are maximally high (for all components at the same time).
+#'
 #' @param n Integer. Number of random vectors to generate.
 #' @param shares Numeric vector of best-guess (mean) values for the shares. Must sum to 1.
 #' @param sds Numeric vector (same length as \code{shares}) containing the standard
 #'   deviations of the shares.
+#' @param max_rel_bias Numeric scalar (default `0.1`).  Threshold for the
+#'   largest acceptable relative bias (10 % by default) between the
+#'   simulated mean and the target share.  Components whose simulated bias
+#'   exceeds this value are listed in a warning
 #'
 #' @references
 #' Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot.
 #' "Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks:
 #' The Case of Dissociative Recombinations." *The Journal of Chemical Physics* 133, no. 13 (2010): 134110.
-#' \doi{10.1063/1.3479907}
+#' doi:{10.1063/1.3479907}
 #'
 #' @return A numeric matrix of dimension \code{n} times \code{length(shares)}, with each
 #' row a single Generalised Dirichlet random deviate.
@@ -81,7 +96,7 @@ rdirichlet_uniform <- function(n, length, names = NULL) {
 #'
 #' @examples
 #' rdirichlet_generalised(5, c(0.2, 0.3, 0.5), c(0.05, 0.07, 0.06))
-rdirichlet_generalised <- function(n, shares, sds) {
+rdirichlet_generalised <- function(n, shares, sds, max_rel_bias = 0.1) {
   if (!isTRUE(all.equal(names(shares), names(sds)))) {
     stop("`shares` and `sds` must have the same names. They can also both be NULL.")
   }
@@ -95,6 +110,26 @@ rdirichlet_generalised <- function(n, shares, sds) {
   }
   sample <- x / rowSums(x)
   colnames(sample) <- names(shares)
+
+  # bias check
+  rel_bias <- (colMeans(sample) - shares) / shares
+  idx_bad  <- which(rel_bias > max_rel_bias)
+  if (length(idx_bad) > 0) {
+    raw_names <- names(rel_bias)[idx_bad]                    # may be NULL
+    labels    <- ifelse(is.null(raw_names) || raw_names == "",
+                        sprintf("shares[%d]", idx_bad),      # fallback
+                        raw_names)                           # proper name
+    detail_lines <- sprintf("%s: bias of %.3f", labels, rel_bias[idx_bad])
+
+    warning(paste0(
+      "The samples of the following components show a relative bias of > ",
+      max_rel_bias, ":\n",
+      paste(detail_lines, collapse = "\n"),
+      "\nMost likely this is because the standard deviations you provided are too high for those components. You might decrease the SD of those components, or if you really think that the uncertainty on that components is that high consider using the Maximum Entropy Dirichlet distribution instead by setting `sds = NULL`. "
+    ), call. = FALSE)
+  }
+
+
   return(sample)
 }
 

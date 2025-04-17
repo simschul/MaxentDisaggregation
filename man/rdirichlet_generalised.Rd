@@ -4,7 +4,7 @@
 \alias{rdirichlet_generalised}
 \title{Generate random numbers from a Generalised Dirichlet distribution}
 \usage{
-rdirichlet_generalised(n, shares, sds)
+rdirichlet_generalised(n, shares, sds, max_rel_bias = 0.1)
 }
 \arguments{
 \item{n}{Integer. Number of random vectors to generate.}
@@ -13,6 +13,11 @@ rdirichlet_generalised(n, shares, sds)
 
 \item{sds}{Numeric vector (same length as \code{shares}) containing the standard
 deviations of the shares.}
+
+\item{max_rel_bias}{Numeric scalar (default \code{0.1}).  Threshold for the
+largest acceptable relative bias (10 \% by default) between the
+simulated mean and the target share.  Components whose simulated bias
+exceeds this value are listed in a warning}
 }
 \value{
 A numeric matrix of dimension \code{n} times \code{length(shares)}, with each
@@ -24,6 +29,18 @@ Generates random vectors from a Generalised Dirichlet distribution using the mea
 parameters (\eqn{\alpha_2} and \eqn{\beta_2}) are derived from the provided means
 and SDs, following the approach of Plessis et al. (2010).
 }
+\details{
+Please note that unrealistic combinations of \code{shares} and \code{sds}, in particular
+components with \code{sds/shares > 0.5}, might result in biased samples.
+Against this background, after the draw, the function checks the sample mean of every
+component against the target share.  If the \emph{relative bias}
+\deqn{\text{bias}_i = \frac{\bar x_i - \mu_i}{\mu_i}}
+exceeds \code{max_rel_bias}, a warning is issued.
+If you really think that the uncertainty of your \code{shares} is very high
+(in the order of a coefficient of variation of 0.5 or more), consider using
+the Maximum Entropy Dirichlet distribution instead by setting \code{sds=NULL} (the default).
+This way the uncertainties are fitted such that they are maximally high (for all components at the same time).
+}
 \examples{
 rdirichlet_generalised(5, c(0.2, 0.3, 0.5), c(0.05, 0.07, 0.06))
 }
@@ -31,7 +48,7 @@ rdirichlet_generalised(5, c(0.2, 0.3, 0.5), c(0.05, 0.07, 0.06))
 Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot.
 "Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks:
 The Case of Dissociative Recombinations." \emph{The Journal of Chemical Physics} 133, no. 13 (2010): 134110.
-\doi{10.1063/1.3479907}
+doi{10.1063/1.3479907}
 }
 \seealso{
 \code{\link[=rgamma]{rgamma()}}, \code{\link[=rdirichlet]{rdirichlet()}}
