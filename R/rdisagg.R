@@ -41,7 +41,7 @@
 #'
 #' # Example 2: Normal aggregate, Dirichlet shares w/ MaxEnt
 #' rdisagg(n = 5, mean_0 = 100, sd_0 = 10, shares = c(0.1, 0.2, 0.7))
-rdisagg <- function(n, mean_0, sd_0 = NULL, min = 0, max = Inf,
+rdisagg <- function(n, mean_0 = NULL, sd_0 = NULL, min = 0, max = Inf,
                     shares, sds = NULL, log = FALSE) {
 
   sample_agg <- ragg(

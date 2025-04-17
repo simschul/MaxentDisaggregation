@@ -54,7 +54,7 @@
 #'
 #' # 6) Standard lognormal (using meanlog, sdlog)
 #' x6 <- ragg(10, meanlog = 0, sdlog = 1)
-ragg <- function(n, mean = NULL, sd = NULL, min = 0, max = Inf, meanlog = NULL, sdlog = NULL,
+ragg <- function(n, mean = NULL, sd = NULL, min = -Inf, max = Inf, meanlog = NULL, sdlog = NULL,
                  log = FALSE) {
 
   # Case 1: Normal distribution
