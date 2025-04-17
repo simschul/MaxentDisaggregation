@@ -8,7 +8,7 @@ ragg(
   n,
   mean = NULL,
   sd = NULL,
-  min = 0,
+  min = -Inf,
   max = Inf,
   meanlog = NULL,
   sdlog = NULL,

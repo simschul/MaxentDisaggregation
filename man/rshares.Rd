@@ -36,26 +36,26 @@ provided by \code{shares} and \code{sds}. All generated vectors sum to 1.
 \details{
 The logic is:
 \enumerate{
-\item If both mean and SD are available for \strong{all} shares, use \code{\link[=rdir_generalised]{rdir_generalised()}}.
-\item If only mean values (no SDs) are available for \strong{all} shares, use \code{\link[=rdir_maxent]{rdir_maxent()}}.
+\item If both mean and SD are available for \strong{all} shares, use \code{\link[=rdirichlet_generalised]{rdirichlet_generalised()}}.
+\item If only mean values (no SDs) are available for \strong{all} shares, use \code{\link[=rdirichlet_maxent]{rdirichlet_maxent()}}.
+\item If partial information in the mean values is present (i.e. there are \code{NA}'s in \code{shares})
+the output depends on \code{na_action}: By default, if \code{na_action} is "fill", any \code{NA} in \code{shares} is replaced
+proportionally so that the new \code{shares} still sum to 1. If \code{na_action} is "remove",
+elements with \code{NA} are dropped.
 \item Otherwise, throw an error if partial information is present (e.g., some but not all
 SDs are defined).
 }
-
-By default, if \code{na_action} is "fill", any \code{NA} in \code{shares} is replaced
-proportionally so that the new \code{shares} still sum to 1. If \code{na_action} is "remove",
-elements with \code{NA} are dropped.
 }
 \examples{
-# Example with no SDs -> uses rdir_maxent
+# Example with no SDs -> uses rdirichlet_maxent
 rshares(5, c(0.1, 0.3, 0.6))
 
-# Example with means & SDs for all -> uses rdir_generalised
+# Example with means & SDs for all -> uses rdirichlet_generalised
 rshares(5, c(0.1, 0.3, 0.6), c(0.05, 0.07, 0.02))
 
 # 'na_action' example: fill missing shares to sum to 1
-rshares(5, c(NA, 0.2, 0.3), c(NA, 0.04, 0.05), na_action = "fill")
+rshares(5, c(NA, 0.2, 0.3) , na_action = "fill")
 }
 \seealso{
-\code{\link[=rdir_generalised]{rdir_generalised()}}, \code{\link[=rdir_maxent]{rdir_maxent()}}, \code{\link[=rbeta3]{rbeta3()}}
+\code{\link[=rdirichlet_generalised]{rdirichlet_generalised()}}, \code{\link[=rdirichlet_maxent]{rdirichlet_maxent()}}, \code{\link[=rbeta3]{rbeta3()}}
 }

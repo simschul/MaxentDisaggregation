@@ -6,7 +6,7 @@
 \usage{
 rdisagg(
   n,
-  mean_0,
+  mean_0 = NULL,
   sd_0 = NULL,
   min = 0,
   max = Inf,
