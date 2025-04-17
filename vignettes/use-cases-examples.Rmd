@@ -1,288 +1,216 @@
 ---
-title: "use-cases-examples"
+title: "Use Cases and Examples for disaggR"
 output: rmarkdown::html_vignette
-# vignette: >
-# %\VignetteIndexEntry{use-cases-examples}
-#   %\VignetteEngine{knitr::rmarkdown}
-#   %\VignetteEncoding{UTF-8}
+vignette: >
+  %\VignetteIndexEntry{use-cases-examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>", 
+  fig.width = 5
 )
 ```
 
-```{r setup}
+
+
+## Introduction
+
+The `disaggR` package enables statistically sound disaggregation of aggregate data with uncertainty propagation. When disaggregating data (splitting a total into components), the components are naturally correlated. These correlations must be properly accounted for in uncertainty analysis to avoid mis-estimating uncertainty in downstream calculations.
+
+This vignette demonstrates how to use `disaggR` through a practical example in Industrial Ecology.
+
+```{r, message=FALSE}
 library(disaggR)
 library(ggplot2)
-library(matrixStats)
 library(reshape2)
+library(GGally)
+library(truncnorm)  # For the rtruncnorm function
 devtools::load_all()
 ```
 
-## Example 1: Carbon Footprint of Aluminum Used in Vehicle Manufacturing
+## Example: Carbon Footprint of Steel in Vehicle Manufacturing
 
-Imagine an Industrial Ecology researcher assessing the carbon footprint
-associated with aluminum usage in vehicle manufacturing. Vehicles
-contain aluminum sourced from different primary and secondary production
-routes or from imports, each having considerably different environmental
-footprints.
+### Problem Statement
 
-![Example 1: Carbon Footprint of Aluminum Used in Vehicle
-Manufacturing](images/example_aluminium.png)
+An Industrial Ecology researcher has data on total steel consumption for vehicle manufacturing but needs to disaggregate this figure by vehicle type (ICE, BEV, and HBEV) based on production volume proxies. A second researcher will use these disaggregated figures for Life Cycle Assessment (LCA).
 
-The researcher split their analysis into two distinct models:
 
--   Model 1: Disaggregating the aluminum sources used in vehicle
-    manufacturing
--   Model 2: Life Cycle Assessment (LCA) of carbon footprint of the
-    aluminum used in vehicle manufacturing
+![Figure 1: A diagram of the example](images/example_steel.png){width=100%}
 
-### Model 1: Disaggregating Aluminum Sources
+Properly accounting for correlations between the disaggregated values is critical for accurate uncertainty estimation in the LCA.
 
-We assume that the researcher has the following pieces of information:
+### Available Information
 
-1.  a total aluminum consumption figure for vehicle manufacturing (e.g.,
-    500,000 tonnes/year)
-2.  an uncertainty estimate for that total (e.g. a standard deviation of
-    25,000)
-3.  proxy data to calculate "best-guesses" of the shares for the three
-    aluminum production routes (e.g. primary aluminum: 40%, secondary
-    aluminum: 45%, imported aluminum: 15%)
+The researcher has:
 
-With the `disaggR` package, getting samples for the three disaggregate
-aluminum production routes while accounting for the underlying
-uncertainties and correlations is simply one function call:
+1. A best estimate for total steel consumption: 100 tonnes/year
+2. An uncertainty estimate for that total: standard deviation of 3 tonnes/year
+3. A natural lower bound of 0 (no negative consumption)
+4. Proxy-based estimates of shares by vehicle type: ICE (80%), BEV (19%), HBEV (1%)
+
+### Generating Correlated Samples with disaggR
+
+The `rdisagg()` function generates samples that respect all available information:
 
 ```{r}
-sample <- rdisagg(n = 1E5, # sample size
-                  mean_0 = 500000, # best guess for total
-                  sd_0 = 500000/2, #25000, # standard deviation for total
-                  min = 0,
-                  shares = c("primary" = 0.4, # best guesses for the shares
-                             "secondary" = 0.45, 
-                             "imported" = 0.15), 
-                  sds = c("primary" = 0.04, # best guesses for the shares
-                             "secondary" = 0.045, 
-                             "imported" = 0.015),
-                  log = TRUE)
-
-sample <- rdisagg(n = 1E5, # sample size
-                  mean_0 = 100, # best guess for total
-                  sd_0 = 5, #25000, # standard deviation for total
-                  min = 0,
-                  shares = c("primary" = 0.1, # best guesses for the shares
-                             "secondary" = 0.3, 
-                             "imported" = 0.6),
-                  log = TRUE)
-
+sample <- rdisagg(n = 1E4,        # Sample size
+                  mean_0 = 100,    # Best estimate for total
+                  sd_0 = 3,        # Standard deviation for total
+                  min = 0,         # Lower bound
+                  shares = c("ICE" = 0.8,    # Best estimates for shares
+                             "BEV" = 0.19, 
+                             "HBEV" = 0.01),
+                  log = TRUE)      # Use log-normal distribution for sampling
 ```
 
-The `sample` object is a matrix with three columns (one for each
-aluminum production route) and `n = 1E5` rows:
+The `log = TRUE` parameter means we're assuming a log-normal distribution for the aggregate, which is appropriate for quantities that cannot be negative and may be right-skewed. Setting `log = FALSE` would assume a truncated normal distribution (because of `min = 0`). 
 
-```{r}
+The result is a matrix with three columns (one per vehicle type) and 1,000 rows:
+
+```{r, fig.width=7}
 head(sample)
+
+# Visualize the distribution of each component
+sample_df <- reshape2::melt(sample, varnames = c('iteration', 'vehicle_type'))
+ggplot(sample_df, aes(x = value, col = vehicle_type, fill = vehicle_type)) + 
+  geom_histogram(alpha = 0.3, position = 'identity', bins = 100) +
+  labs(x = "Steel Consumption (tonnes)", y = "Frequency", 
+       title = "Distribution of Steel Consumption by Vehicle Type")
 ```
 
-Let's plot the individual samples as histograms:
+### Validating the Samples
+
+Let's verify that our samples are consistent with our input information:
 
 ```{r}
-# reshape to long data.frame
-sample_df <- reshape2::melt(sample, varnames = c('iteration', 'aluminum_source'))
-
-# plot using ggplot
-ggplot(sample_df, aes(x = value, col = aluminum_source, fill = aluminum_source))+ 
-  geom_histogram(alpha = 0.3, position = 'identity')
-```
-
-#### Consistency checks
-
-Next we check whether sample generated by `rdisagg()` is consistent with
-the information the researcher provided in the beginning. First, we look
-at the total aluminum production by summing the disaggregates:
-
-```{r}
-# row wise sum the sample matrix
+# Check if the total matches our specified mean and SD
 sample_total <- rowSums(sample)
+cat("Mean of the sampled total:", mean(sample_total), "\n")
+cat("SD of the sampled total:", sd(sample_total), "\n")
 
-cat("Mean of the sampled total: ", mean(sample_total))
-cat("SD of the sampled total", sd(sample_total))
-
-```
-
-Indeed, the sample mean and SD are very close to the ones passed to
-`rdisagg`.
-
-Next, we look if the sample is consistent with the provided shares:
-
-```{r}
-# row wise divide the disaggregate samples by the total
+# Check if shares match our specified values
 sample_shares <- sample / sample_total
-
-cat("Means of the sampled shares: ", colMeans(sample_shares))
+cat("Means of the sampled shares:", colMeans(sample_shares), "\n")
 ```
 
-Again, very close to the shares provided in the beginning.
+### Understanding Correlations in the Sample
 
-#### Correlations
+Because the components must sum to the total, they are naturally correlated:
 
-As the shares were sampled from a Dirichlet distribution, they naturally
-sum to one...
+```{r, fig.width=6, fig.height=6}
+# Visualize correlations
+ggpairs(as.data.frame(sample), aes(alpha = 0.1)) +
+  labs(title = "Correlations Between Vehicle Type Steel Consumption")
+```
+
+The sign and magnitude of correlations depend on the relative uncertainties of the aggregate and shares. With moderate uncertainty in the total (CV = 3%) and high uncertainty in the shares (default Maximum Entropy behavior, see `?rdirichlet_maxent` for more details), we observe negative correlations between components.
+
+If we increase uncertainty in the total while constraining the shares more tightly:
+
+```{r, fig.width=6, fig.height=6}
+sample2 <- rdisagg(n = 1E4, 
+                   mean_0 = 100, 
+                   sd_0 = 50,      # Larger SD for total
+                   min = 0, 
+                   shares = c("ICE" = 0.8, 
+                             "BEV" = 0.19, 
+                             "HBEV" = 0.01),
+                   sds = c("ICE" = 0.008,    # Small SDs for shares
+                           "BEV" = 0.0019, 
+                           "HBEV" = 0.0001),
+                   log = TRUE)
+
+ggpairs(as.data.frame(sample2), aes(alpha = 0.1)) +
+  labs(title = "Correlations with High Total Uncertainty and Low Share Uncertainty")
+```
+
+With high uncertainty in the total and low uncertainty in the shares, correlations become positive.
+
+### Downstream Analysis: LCA of Carbon Footprint
+
+Let's examine how these correlations impact a downstream LCA calculation. We assume an emission factor of 2.5 tonnes CO₂ per tonne of steel:
 
 ```{r}
-print(all.equal(rowSums(sample_shares), rep(1, nrow(sample_shares))))
+emission_factor_steel <- 2.5
 ```
 
-... and they are correlated:
+#### Approach 1: Using Full Samples (With Correlations)
+
+The proper approach is to use the full correlated sample:
 
 ```{r}
-# calculate pearson correlation matrix
-cor_mat <- cor(sample)
-cor_mat
+sample_emissions_full <- sample * emission_factor_steel
+total_emissions_full <- rowSums(sample_emissions_full)
+
+cat("Mean emissions:", mean(total_emissions_full), "tonnes CO₂\n")
+cat("SD emissions:", sd(total_emissions_full), "tonnes CO₂\n")
+cat("CV emissions:", sd(total_emissions_full) / mean(total_emissions_full), "\n")
 ```
 
-The sign of the correlation depends on the magnitude of the uncertainty
-of the aggregate and the shares. In this case, we assumed a moderate
-uncertainty on the total (a coefficient of variation of 10%) and a
-maximum high uncertainty of the shares[^1], leading to negative
-correlations between the three individual components.
+#### Approach 2: Using Summary Statistics Only (Ignoring Correlations)
 
-[^1]: Since we did not specify the uncertainty of the shares (`sds`
-    equals `NULL` by default), the concentration parameter `gamma` of
-    the Dirichlet distribution is estimated based on the principle of
-    Maximum Entropy
-
-However, if we assume instead a very large uncertainty on the aggregate,
-e.g. a SD of 500,000 (reflecting a coefficient of variation of 100%):
-
-```{r}
-sample2 <- rdisagg(n = 1E5, 
-                   mean_0 = 500000, 
-                   sd_0 = 500000, # large standard deviation for total
-                   shares = c("primary" = 0.1, 
-                              "secondary" = 0.45, 
-                              "imported" = 0.45))
-
-```
-
-The correlations become positive:
-
-```{r}
-# calculate pearson correlation matrix
-cor_mat2 <- cor(sample2)
-cor_mat2
-```
-
-#### Sharing results
-
-As shown in ...
+If researcher 1 only shares summary statistics:
 
 ```{r}
 result_summary <- list(
   mean = colMeans(sample), 
-  sd = colSds(sample), 
-  meanlog = colMeans(log(sample)), 
-  sdlog = colSds(log(sample))
+  sd = apply(sample, 2, sd)
 )
 print(result_summary)
 ```
 
-```{r}
-
-```
-
-### Model 2 – Life Cycle Assessment (LCA) of Carbon Footprint
-
-The LCA model applies different emission factors depending on the
-aluminum production route. We assume reasonable emission factors of 16
-$tCO_2/tonne$ for primary aluminum, 1 $tCO_2/tonne$ for recycled
-aluminum and 8 $tCO_2/tonne$ for imported aluminum.
+And researcher 2 samples independently from these statistics:
 
 ```{r}
-emission_factors <- c('primary' = 1, 
-                      'secondary' = 1, 
-                      'imported'= 1)
-```
-
-Case 0: full samples
-
-```{r}
-sample_emissions_full <- sample * emission_factors
-total_emissions_full <- rowSums(sample_emissions_full)
-```
-
-
-```{r}
-cor(sample_emissions_full)
-```
-
-
-```{r}
-cat("Mean emissions: ", mean(total_emissions_full))
-cat("SD emissions: ", sd(total_emissions_full))
-cat("CV emissions: ", sd(total_emissions_full) / mean(total_emissions_full))
-
-```
-
-Case 1: univariate
-
-```{r}
-# sample from summary statistics
-sample_alum_univariate <- data.frame(
-  'primary' = rtruncnorm(1E5, 
-                         a = 0,
-                         mean = result_summary$mean[1], 
-                         sd = result_summary$sd[1]), 
-  'secondary' = rtruncnorm(1E5, 
-                           a = 0,
-                           mean = result_summary$mean[2], 
-                           sd = result_summary$sd[2]), 
-  'imports' = rtruncnorm(1E5, 
-                         a = 0,
-                         mean = result_summary$mean[3], 
-                         sd = result_summary$sd[3])
+# Independent sampling ignoring correlations
+sample_steel_by_vehicle_type <- data.frame(
+  'ICE' = rtruncnorm(1E4, 
+                     a = 0,
+                     mean = result_summary$mean[1], 
+                     sd = result_summary$sd[1]), 
+  'BEV' = rtruncnorm(1E4, 
+                     a = 0,
+                     mean = result_summary$mean[2], 
+                     sd = result_summary$sd[2]), 
+  'HBEV' = rtruncnorm(1E4, 
+                     a = 0,
+                     mean = result_summary$mean[3], 
+                     sd = result_summary$sd[3])
 )
-# sample_alum_univariate <- data.frame(
-#   'primary' = rlnorm(1E5, 
-#                          meanlog = result_summary$meanlog[1], 
-#                          sdlog = result_summary$sdlog[1]), 
-#   'secondary' = rlnorm(1E5, 
-#                            meanlog = result_summary$meanlog[2], 
-#                            sdlog = result_summary$sdlog[2]), 
-#   'imports' = rlnorm(1E5, 
-#                          meanlog = result_summary$meanlog[3], 
-#                          sdlog = result_summary$sdlog[3])
-# )
 
-```
-
-```{r}
-sample_emissions_univariate <- sample_alum_univariate * emission_factors
+sample_emissions_univariate <- sample_steel_by_vehicle_type * emission_factor_steel
 total_emissions_univariate <- rowSums(sample_emissions_univariate)
+
+cat("Mean emissions:", mean(total_emissions_univariate), "tonnes CO₂\n")
+cat("SD emissions:", sd(total_emissions_univariate), "tonnes CO₂\n")
+cat("CV emissions:", sd(total_emissions_univariate) / mean(total_emissions_univariate), "\n")
 ```
 
-```{r}
-cat("Mean emissions: ", mean(total_emissions_univariate))
-cat("SD emissions: ", sd(total_emissions_univariate))
-cat("CV emissions: ", sd(total_emissions_univariate) / mean(total_emissions_univariate))
+#### Comparing Results
 
+Let's compare the uncertainty distributions from both approaches:
+
+```{r, fig.width=7}
+comparison_df <- data.frame(
+  approach = c(rep("With Correlations", length(total_emissions_full)),
+               rep("Independent Sampling", length(total_emissions_univariate))),
+  emissions = c(total_emissions_full, total_emissions_univariate)
+)
+
+ggplot(comparison_df, aes(x = emissions, fill = approach)) + 
+  geom_histogram(alpha = 0.5, position = 'identity') +
+  labs(x = "Total Emissions (tonnes CO₂)", y = "Frequency", 
+       title = "Impact of Correlations on Uncertainty Estimation")
 ```
 
-```{r}
+The difference in uncertainty estimates shows why properly accounting for correlations matters. Ignoring correlations typically leads to **overestimating uncertainty** in the final result (wider distribution) when the correlations are negative. 
 
-```
+## Conclusion
 
-```{r}
-test <- data.table(
-  univariate = total_emissions_univariate, 
-  original = total_emissions_full
-) %>% data.table::melt()
-test[,max(value), by = variable]
+The `disaggR` package provides a simple interface for generating statistically valid samples of disaggregated data while properly accounting for correlations. This is crucial for accurate uncertainty propagation in subsequent analyses.
 
-test %>% 
-  ggplot(aes(x = value, col = variable, fill = variable)) + 
-  geom_histogram(alpha = 0.3, position = 'identity')
-```
+For more complex disaggregation scenarios, see the package documentation on additional parameters for controlling share uncertainties and distribution types.
