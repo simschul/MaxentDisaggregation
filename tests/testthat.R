@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(disaggR)
+library(MaxentDisaggregation)
 
-test_check("disaggR")
+test_check("MaxentDisaggregation")

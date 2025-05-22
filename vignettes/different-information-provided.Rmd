@@ -1,5 +1,5 @@
 ---
-title: "Different Information Scenarios in disaggR"
+title: "Different Information Scenarios in MaxentDisaggregation"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{different-information-provided}
@@ -20,7 +20,7 @@ message = FALSE
 
 ## Introduction
 
-The `disaggR` package provides flexible methods for data disaggregation with uncertainty propagation. This vignette demonstrates how the sampling behavior of `rdisagg()` changes based on the information you provide.
+The `MaxentDisaggregation` package provides flexible methods for data disaggregation with uncertainty propagation. This vignette demonstrates how the sampling behavior of `rdisagg()` changes based on the information you provide.
 
 The `rdisagg()` function internally calls two specialized functions:
 
@@ -38,7 +38,7 @@ The package uses decision trees to automatically select appropriate probability 
 
 
 ```{r, message=FALSE}
-library(disaggR)
+library(MaxentDisaggregation)
 library(ggplot2)
 library(reshape2)
 library(data.table)  # For data manipulation
@@ -228,7 +228,7 @@ plot_histograms(sample_disagg_custom) +
 
 ## Conclusion
 
-The `disaggR` package automatically selects appropriate distributions based on the information you provide:
+The `MaxentDisaggregation` package automatically selects appropriate distributions based on the information you provide:
 
 1. For shares:
    - No information → Uniform Dirichlet

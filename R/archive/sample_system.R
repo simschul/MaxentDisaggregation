@@ -9,14 +9,14 @@
 #' @examples
 generate_sampling_fun <- function(x, ct) {
   # Capture the current package versions
-  disaggR_version <- as.character(packageVersion("disaggR"))
+  disaggR_version <- as.character(packageVersion("MaxentDisaggregation"))
   nloptr_version <- as.character(packageVersion("nloptr"))
 
 
   function(n) {
     # Inside the generated function: Check package versions
-    if (as.character(packageVersion("disaggR")) != disaggR_version) {
-      stop("disaggR package version does not match the version used to generate this function.")
+    if (as.character(packageVersion("MaxentDisaggregation")) != disaggR_version) {
+      stop("MaxentDisaggregation package version does not match the version used to generate this function.")
     }
 
     if (as.character(packageVersion("nloptr")) != nloptr_version) {
@@ -99,14 +99,14 @@ generate_sampling_fun2 <- function(data,
                                   sds = 'sds',
                                   y = 'y') {
   # Capture the current package versions
-  disaggR_version <- as.character(packageVersion("disaggR"))
+  disaggR_version <- as.character(packageVersion("MaxentDisaggregation"))
   nloptr_version <- as.character(packageVersion("nloptr"))
 
 
   function(n) {
     # Inside the generated function: Check package versions
-    if (as.character(packageVersion("disaggR")) != disaggR_version) {
-      stop("disaggR package version does not match the version used to generate this function.")
+    if (as.character(packageVersion("MaxentDisaggregation")) != disaggR_version) {
+      stop("MaxentDisaggregation package version does not match the version used to generate this function.")
     }
 
     if (as.character(packageVersion("nloptr")) != nloptr_version) {

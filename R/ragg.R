@@ -47,7 +47,7 @@
 #' x3 <- ragg(10, mean = 5, sd = 1, min = 3, max = 7)
 #'
 #' # 4) Exponential distribution
-#' x4 <- ragg(10, mean = 2)
+#' x4 <- ragg(10, mean = 2, min = 0)
 #'
 #' # 5) Uniform distribution
 #' x5 <- ragg(10, min = 0, max = 10)

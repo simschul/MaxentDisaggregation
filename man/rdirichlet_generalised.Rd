@@ -48,7 +48,7 @@ rdirichlet_generalised(5, c(0.2, 0.3, 0.5), c(0.05, 0.07, 0.06))
 Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot.
 "Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks:
 The Case of Dissociative Recombinations." \emph{The Journal of Chemical Physics} 133, no. 13 (2010): 134110.
-doi{10.1063/1.3479907}
+doi:{10.1063/1.3479907}
 }
 \seealso{
 \code{\link[=rgamma]{rgamma()}}, \code{\link[=rdirichlet]{rdirichlet()}}

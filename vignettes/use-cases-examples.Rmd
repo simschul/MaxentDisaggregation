@@ -1,5 +1,5 @@
 ---
-title: "Use Cases and Examples for disaggR"
+title: "Use Cases and Examples for MaxentDisaggregation"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{use-cases-examples}
@@ -19,12 +19,12 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The `disaggR` package enables statistically sound disaggregation of aggregate data with uncertainty propagation. When disaggregating data (splitting a total into components), the components are naturally correlated. These correlations must be properly accounted for in uncertainty analysis to avoid mis-estimating uncertainty in downstream calculations.
+The `MaxentDisaggregation` package enables statistically sound disaggregation of aggregate data with uncertainty propagation. When disaggregating data (splitting a total into components), the components are naturally correlated. These correlations must be properly accounted for in uncertainty analysis to avoid mis-estimating uncertainty in downstream calculations.
 
-This vignette demonstrates how to use `disaggR` through a practical example in Industrial Ecology.
+This vignette demonstrates how to use `MaxentDisaggregation` through a practical example in Industrial Ecology.
 
 ```{r, message=FALSE}
-library(disaggR)
+library(MaxentDisaggregation)
 library(ggplot2)
 library(reshape2)
 library(GGally)
@@ -52,7 +52,7 @@ The researcher has:
 3. A natural lower bound of 0 (no negative consumption)
 4. Proxy-based estimates of shares by vehicle type: ICE (80%), BEV (19%), HBEV (1%)
 
-### Generating Correlated Samples with disaggR
+### Generating Correlated Samples with MaxentDisaggregation
 
 The `rdisagg()` function generates samples that respect all available information:
 
@@ -211,6 +211,6 @@ The difference in uncertainty estimates shows why properly accounting for correl
 
 ## Conclusion
 
-The `disaggR` package provides a simple interface for generating statistically valid samples of disaggregated data while properly accounting for correlations. This is crucial for accurate uncertainty propagation in subsequent analyses.
+The `MaxentDisaggregation` package provides a simple interface for generating statistically valid samples of disaggregated data while properly accounting for correlations. This is crucial for accurate uncertainty propagation in subsequent analyses.
 
 For more complex disaggregation scenarios, see the package documentation on additional parameters for controlling share uncertainties and distribution types.
