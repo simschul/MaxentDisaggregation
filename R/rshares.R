@@ -301,41 +301,13 @@ rshares <- function(n, shares, sds = NULL,
     sample <- rdirichlet_maxent(n, shares)
   } else {
     # nested Dirichlet approach
-    sample <- matrix(0, nrow = n, ncol = K)
-    colnames(sample) <- names(shares)
-    if (sum(have_both) > 0){
-      # sample all shares with both mean + sd
-      sample[, have_both] <- rbeta3(n, shares = shares[have_both],
-                                    sds = sds[have_both], max_iter = max_iter)
-
-      # check possible bias due to rejection
-      emp_mean <- colMeans(sample[,have_both, drop = FALSE])
-      diff_mean  <- abs(emp_mean - shares[have_both]) / shares[have_both]
-      bias <- any(diff_mean > max_rel_bias)
-      if (isTRUE(bias)) {
-        stop("The parameter combination you provide is not consistent with the constraint of sum to 1
-              due to too high uncertainty on some shares. If you really think that uncertainty is that
-             high for those shares, set them to NA so that they are sampled from Maxent Dirichlet instead")
-      }
-    }
-    if (sum(have_mean_only) > 0) {
-      # rescale shares to sum to one
-      alpha2 <- shares[have_mean_only] / sum(shares[have_mean_only])
-      # sample all shares with mean only
-      sample_temp <- rdirichlet_maxent(n, alpha2)
-      # rescale sample to make rows sum to one
-      sample[, have_mean_only] <- sample_temp * (1-rowSums(sample))
-    }
-
-    # stop(
-    #   paste0(
-    #     "Please either provide positive numeric values for all elements in `sds` ",
-    #     "for which you provided positive numeric values for `shares`, ",
-    #     "or provide no `sds` at all (NA vectors). Partial specification is not supported."
-    #   )
-    # )
+    sample <- .rshares_nested(
+      n, shares, sds,
+      max_rel_bias   = max_rel_bias,
+      max_iter_bias_fix = 20,        # <- tweak if needed
+      max_iter_rbeta3   = max_iter
+    )
   }
-
   return(sample)
 }
 
@@ -462,7 +434,7 @@ rshares <- function(n, shares, sds = NULL,
 #' @examples
 #' # Means that sum to less than 1
 #' rbeta3(5, c(0.2, 0.3, 0.4), c(0.05, 0.04, 0.03))
-rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1e3) {
+rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1e2) {
   var <- sds^2
   undef_comb <- (shares * (1 - shares)) <= var  # Beta undefined if var > mu*(1-mu)
 
