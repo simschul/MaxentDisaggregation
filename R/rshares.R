@@ -268,7 +268,7 @@ rdirichlet_standard <- function(n, alpha, threshold = 1e-2) {
 #' # 'na_action' example: fill missing shares to sum to 1
 #' rshares(5, c(NA, 0.2, 0.3) , na_action = "fill")
 rshares <- function(n, shares, sds = NULL,
-                    na_action = "fill", max_iter = 1e3, ...) {
+                    na_action = "fill", max_iter = 1e3, max_rel_bias = 0.1, ...) {
 
   if (is.null(sds)) {
     sds <- rep(NA, length(shares))
@@ -288,28 +288,149 @@ rshares <- function(n, shares, sds = NULL,
   if (!isTRUE(all.equal(sum(shares), 1))) {
     stop("shares must sum to 1! If you have NAs, consider setting na_action = 'fill'.")
   }
+  K <- length(shares)
 
   have_mean_only <- is.finite(shares) & !is.finite(sds)
   have_both      <- is.finite(shares) & is.finite(sds)
 
   if (all(have_both)) {
     # All shares have corresponding SDs: use generalised Dirichlet
-    sample <- rdirichlet_generalised(n, shares, sds)
+    sample <- rdirichlet_generalised(n, shares, sds, max_rel_bias = max_rel_bias)
   } else if (all(have_mean_only)) {
     # All shares have means, no SDs: use Dirichlet with maxent for gamma
     sample <- rdirichlet_maxent(n, shares)
   } else {
-    stop(
-      paste0(
-        "Please either provide positive numeric values for all elements in `sds` ",
-        "for which you provided positive numeric values for `shares`, ",
-        "or provide no `sds` at all (NA vectors). Partial specification is not supported."
-      )
-    )
+    # nested Dirichlet approach
+    sample <- matrix(0, nrow = n, ncol = K)
+    colnames(sample) <- names(shares)
+    if (sum(have_both) > 0){
+      # sample all shares with both mean + sd
+      sample[, have_both] <- rbeta3(n, shares = shares[have_both],
+                                    sds = sds[have_both], max_iter = max_iter)
+
+      # check possible bias due to rejection
+      emp_mean <- colMeans(sample[,have_both, drop = FALSE])
+      diff_mean  <- abs(emp_mean - shares[have_both]) / shares[have_both]
+      bias <- any(diff_mean > max_rel_bias)
+      if (isTRUE(bias)) {
+        stop("The parameter combination you provide is not consistent with the constraint of sum to 1
+              due to too high uncertainty on some shares. If you really think that uncertainty is that
+             high for those shares, set them to NA so that they are sampled from Maxent Dirichlet instead")
+      }
+    }
+    if (sum(have_mean_only) > 0) {
+      # rescale shares to sum to one
+      alpha2 <- shares[have_mean_only] / sum(shares[have_mean_only])
+      # sample all shares with mean only
+      sample_temp <- rdirichlet_maxent(n, alpha2)
+      # rescale sample to make rows sum to one
+      sample[, have_mean_only] <- sample_temp * (1-rowSums(sample))
+    }
+
+    # stop(
+    #   paste0(
+    #     "Please either provide positive numeric values for all elements in `sds` ",
+    #     "for which you provided positive numeric values for `shares`, ",
+    #     "or provide no `sds` at all (NA vectors). Partial specification is not supported."
+    #   )
+    # )
   }
 
   return(sample)
 }
+
+# Helper for the nested Dirichlet logic with iterative bias correction
+.rshares_nested <- function(n, shares, sds, max_rel_bias = 0.10,
+                            max_iter_bias_fix = 20, max_iter_rbeta3 = 1e3) {
+
+  iter <- 0
+  repeat {
+    iter <- iter + 1
+    if (iter > max_iter_bias_fix) {
+      stop("Bias could not be reduced below ", max_rel_bias,
+           " after ", max_iter_bias_fix, " iterations.\n",
+           "Consider providing smaller SDs or more NA means.")
+    }
+
+    have_both      <- is.finite(shares) & is.finite(sds)
+    have_mean_only <- is.finite(shares) & !is.finite(sds)
+
+    K      <- length(shares)
+    sample <- matrix(0, nrow = n, ncol = K)
+    colnames(sample) <- names(shares)
+
+    ## 1) Components with mean *and* SD  -->  Beta-truncated sampling
+    if (any(have_both)) {
+      sample[, have_both] <- rbeta3(
+        n,
+        shares = shares[have_both],
+        sds    = sds[have_both],
+        max_iter = max_iter_rbeta3
+      )
+    }
+
+    ## 2) Components with mean only --> MaxEnt Dirichlet (rescaled afterwards)
+    if (any(have_mean_only)) {
+      alpha2        <- shares[have_mean_only] / sum(shares[have_mean_only])
+      sample_dm     <- rdirichlet_maxent(n, alpha2)
+      sample[, have_mean_only] <- sample_dm * (1 - rowSums(sample))
+    }
+
+    ## 3) Bias check on the “have_both” block
+    if (any(have_both)) {
+      emp_mean  <- colMeans(sample[, have_both, drop = FALSE])
+      rel_bias  <- abs(emp_mean - shares[have_both]) / shares[have_both]
+
+      if (all(rel_bias <= max_rel_bias)) {
+        return(sample)                     # Success – exit the loop
+      }
+
+      # → At least one component is too far off: mark its SD as NA
+      sds[have_both][rel_bias > max_rel_bias] <- NA
+      warning(
+        "Relative bias exceeded ", max_rel_bias,
+        " for component(s): ",
+        paste(names(rel_bias)[rel_bias > max_rel_bias], collapse = ", "),
+        ".  Their SDs have been set to NA and will be handled with ",
+        "a Maximum-Entropy Dirichlet on the next iteration.",
+        call. = FALSE
+      )
+    } else {
+      # No components left with SDs – nothing more to fix
+      return(sample)
+    }
+  }
+}
+
+# .rdirichlet_nested <- function(n, shares, sds) {
+#   K <- length(shares)
+#   have_both      <- is.finite(shares) & is.finite(sds)
+#
+#   # nested Dirichlet approach
+#   sample <- matrix(0, nrow = n, ncol = K)
+#   colnames(sample) <- names(shares)
+#
+#   repeat{
+#     # sample all shares with both mean + sd
+#     sample[, have_both] <- rbeta3(n, shares = shares[have_both],
+#                                   sds = sds[have_both], max_iter = max_iter)
+#     # check possible bias due to rejection
+#     emp_mean <- colMeans(sample[,have_both, drop = FALSE])
+#     diff_mean  <- abs(emp_mean - shares[have_both]) / shares[have_both]
+#     bias <- any(diff_mean > max_rel_bias)
+#     if (isFALSE(bias)) {
+#       break
+#     } else {
+#       # set problematic SDs to NA (so that Maxent dirichlet is used for those)
+#       sds[have_both][diff_mean > max_rel_bias] <- NA
+#       sample <- .rdirichlet_nested(n, shares, sds)
+#     }
+#   }
+#
+#     return(sample)
+#
+# }
+
 
 
 #' Generate random numbers from the Beta distribution via mean and SD
@@ -385,4 +506,43 @@ rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1e3) {
 
   colnames(x) <- names(shares)
   return(x)
+}
+
+
+# -------------------------------------------------------------------- #
+# Helper: warn if empirical mean / sd differ too much from targets     #
+# -------------------------------------------------------------------- #
+.check_sample <- function(sample, target_means, target_sds,
+                          thr_mean = 0.10, thr_sd = 0.20) {
+
+  emp_mean <- colMeans(sample)
+  emp_sd   <- apply(sample, 2, sd)
+
+  ## mean check (only where target is finite & > 0)
+  valid_mean <- is.finite(target_means) & target_means > 0
+  diff_mean  <- abs(emp_mean[valid_mean] - target_means[valid_mean]) /
+    target_means[valid_mean]
+
+  if (any(diff_mean > thr_mean)) {
+    idx <- which(diff_mean > thr_mean)
+    warning(
+      "Sample mean deviates by more than ",
+      thr_mean * 100, "% from target for components: ",
+      paste(names(target_means[valid_mean])[idx], collapse = ", ")
+    )
+  }
+
+  ## sd check
+  valid_sd  <- is.finite(target_sds) & target_sds > 0
+  diff_sd   <- abs(emp_sd[valid_sd] - target_sds[valid_sd]) /
+    target_sds[valid_sd]
+
+  if (any(diff_sd > thr_sd)) {
+    idx <- which(diff_sd > thr_sd)
+    warning(
+      "Sample SD deviates by more than ",
+      thr_sd * 100, "% from target for components: ",
+      paste(names(target_sds[valid_sd])[idx], collapse = ", ")
+    )
+  }
 }
