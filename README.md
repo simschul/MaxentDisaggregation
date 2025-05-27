@@ -150,8 +150,7 @@ flowchart-elk TD
     GenDir("Generalised Dirichlet"):::distribution
     NestedDir("Nested Dirichlet"):::distribution
     UniformDir("Uniform Dirichlet"):::distribution
-    NestedDir2["Use all available information by dividing the shares into chunks
-    and sample them according to the same decision tree"]:::explanationnode
+    
 
     %% Define connections
     MeanDecision -- "no" --> UniformDir
