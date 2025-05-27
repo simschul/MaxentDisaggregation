@@ -37,10 +37,10 @@ flowchart-elk TD
     classDef DisAgg2 fill:#e28743,color:black,stroke:none;
     classDef DisAgg3 fill:#abdbe3,color:black,stroke:none;
 
-    agg("$$Y_0$$"):::Aggregate
-    disagg1("$$Y_1=x_1 Y_0$$"):::DisAgg1
-    disagg2("$$Y_2=x_2 Y_0$$"):::DisAgg2
-    disagg3("$$Y_3=x_3 Y_0$$"):::DisAgg3
+    agg("Y_0"):::Aggregate
+    disagg1("Y_1=x_1 Y_0"):::DisAgg1
+    disagg2("Y_2=x_2 Y_0"):::DisAgg1
+    disagg3("Y_3=x_3 Y_0"):::DisAgg1
    
 
     %% Define connections
