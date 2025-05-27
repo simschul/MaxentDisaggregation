@@ -38,9 +38,9 @@ flowchart-elk TD
     classDef DisAgg3 fill:#abdbe3,color:black,stroke:none;
 
     agg("$Y_0$"):::Aggregate
-    disagg1("$Y_1=\alpha_1 Y_0$"):::DisAgg1
-    disagg2("$Y_2=\alpha_2 Y_0$"):::DisAgg2
-    disagg3("$Y_3=\alpha_3 Y_0$"):::DisAgg3
+    disagg1("$Y_1=x_1 Y_0$"):::DisAgg1
+    disagg2("$Y_2=x_2 Y_0$"):::DisAgg2
+    disagg3("$Y_3=x_3 Y_0$"):::DisAgg3
    
 
     %% Define connections
@@ -69,15 +69,15 @@ $Y_i$.
 
 To get estimates for the disaggregate flows, one usually looks for proxy
 data. Those proxy data are used to calculate shares (ratios/fractions)
-of the respective disaggregate units $\alpha_1, ..., \alpha_K$. To
+of the respective disaggregate units $x_1, ..., x_K$. To
 allocate the entire aggregate flow without leaving any residual (thus to
 respect the system balance), those fractions need to sum to one:
 
-$$    \sum_{i=1}^{K} \alpha_i = 1 $$
+$$    \sum_{i=1}^{K} x_i = 1 $$
 
 Disaggregate flows are calculated as
 
-$$ y_i = \alpha_i y_0,  \forall i \in \{1,...,K\}.     $$
+$$ y_i = x_i y_0,  \forall i \in \{1,...,K\}.     $$
 
 ## Sampling disaggregates
 
