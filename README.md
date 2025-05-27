@@ -27,7 +27,27 @@ disaggregation usually involves splitting one data point into several
 disaggregates using proxy data. It is a common problem in many different
 research disciplines.
 
-![](images/clipboard-133169665.png)
+<!-- ![](images/clipboard-133169665.png) -->
+
+``mermaid
+flowchart-elk TD
+    %% Define node classes
+    classDef Aggregate fill:#eeeee4,color:black,stroke:none;
+    classDef DisAgg1 fill:#abdbe3,color:black,stroke:none;
+    classDef DisAgg2 fill:#e28743,color:black,stroke:none;
+    classDef DisAgg3 fill:#abdbe3,color:black,stroke:none;
+
+    agg("$Y_0$"):::Aggregate
+    disagg1("$Y_1=\alpha_1 Y_0$"):::DisAgg1
+    disagg2("$Y_2=\alpha_2 Y_0$"):::DisAgg2
+    disagg3("$Y_3=\alpha_3 Y_0$"):::DisAgg3
+   
+
+    %% Define connections
+    agg  --> disagg1
+    agg  --> disagg2
+    agg  --> disagg3
+```
 
 Data disaggregation usually involves an aggregate flow $Y_0$, which is
 known, such as the total amount of steel manufactured in a given time
