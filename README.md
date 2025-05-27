@@ -71,12 +71,79 @@ distribution is mostly based on the principle of Maximum Entropy
 The aggregate distribution is determined using the following decision
 tree:
 
-![](images/clipboard-1519448807.png)
+<!-- ![](images/clipboard-1519448807.png) -->
+```mermaid
+flowchart-elk TD
+    %% Define node classes
+    classDef decision fill:#e28743,color:black,stroke:none;
+    classDef distribution fill:#abdbe3,color:black,stroke:none;
+    classDef notimplementednode fill:#eeeee4,color:black,stroke:none;
+
+    MeanDecision{{"Best guess/
+    mean available?"}}:::decision
+    SDDecision{{"Standard deviation available?"}}:::decision
+    BoundsDecision1{{"Bounds available?"}}:::decision
+    Uniform("Uniform distribution on [a,b]"):::distribution
+    GoBackToStart["☠️ !Game Over!
+    We suggest to rethink your problem... 🤓"]:::notimplementednode
+    BoundsDecision2{{"Bounds available?"}}:::decision
+    Normal("Normal distribution"):::distribution
+    UnbiasedMean{{"Prefer unbiased mean?"}}:::decision
+    TruncNorm("Truncated Normal 
+    (Maximum Entropy distribution)"):::distribution
+    LogNorm("LogNormal distribution"):::distribution
+    LowerBound0{{"Lower bound = 0?"}}:::decision
+    Exponential("Exponential"):::distribution
+    NotImplemented["Not Implemented"]:::notimplementednode
+
+
+    %% Define connections
+    MeanDecision -- "no" --> BoundsDecision1
+    MeanDecision -- "yes" --> SDDecision
+    SDDecision -- "yes" --> BoundsDecision2
+    BoundsDecision2 -- "yes" --> UnbiasedMean
+    UnbiasedMean -- "yes" --> LogNorm
+    UnbiasedMean -- "no" --> TruncNorm
+    BoundsDecision2 -- "no" --> Normal
+    SDDecision -- "no" --> LowerBound0
+    LowerBound0 -- "yes" --> Exponential
+    LowerBound0 -- "no" --> NotImplemented
+    BoundsDecision1 -- "yes" --> Uniform
+    BoundsDecision1 -- "no" --> GoBackToStart
+```
 
 The shares are sampled from different variants of the Dirichlet
 distribution:
 
-![](images/clipboard-2622115785.png)
+<!-- ![](images/clipboard-2622115785.png) -->
+
+```mermaid
+flowchart-elk TD
+    %% Define node classes
+    classDef decision fill:#e28743,color:black,stroke:none;
+    classDef distribution fill:#abdbe3,color:black,stroke:none;
+    classDef explanationnode fill:#eeeee4,color:black,stroke:none;
+
+    MeanDecision{{"Best guess/mean available?"}}:::decision
+    SDDecision{{"Standard deviation available?"}}:::decision
+    MaxEntDir("Maximum Entropy Dirichlet"):::distribution
+    GenDir("Generalised Dirichlet"):::distribution
+    NestedDir("Nested Dirichlet"):::distribution
+    UniformDir("Uniform Dirichlet"):::distribution
+    NestedDir2["Use all available information by dividing the shares into chunks
+    and sample them according to the same decision tree"]:::explanationnode
+
+    %% Define connections
+    MeanDecision -- "no" --> UniformDir
+    MeanDecision -- "yes" --> SDDecision
+    MeanDecision -- "paritially" --> NestedDir
+    SDDecision -- "no" --> MaxEntDir
+    SDDecision -- "yes" --> GenDir
+    SDDecision -- "partially" --> NestedDir
+    NestedDir --> NestedDir2
+    <!-- NestedDir2 --> MeanDecision -->
+```
+
 
 ## How to use
 
