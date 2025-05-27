@@ -141,7 +141,6 @@ flowchart-elk TD
     SDDecision -- "yes" --> GenDir
     SDDecision -- "partially" --> NestedDir
     NestedDir --> NestedDir2
-    <!-- NestedDir2 --> MeanDecision -->
 ```
 
 
