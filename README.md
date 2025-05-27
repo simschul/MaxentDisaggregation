@@ -29,7 +29,7 @@ research disciplines.
 
 <!-- ![](images/clipboard-133169665.png) -->
 
-``mermaid
+```mermaid
 flowchart-elk TD
     %% Define node classes
     classDef Aggregate fill:#eeeee4,color:black,stroke:none;
