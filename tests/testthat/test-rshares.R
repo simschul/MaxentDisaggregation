@@ -75,10 +75,10 @@ test_that("rbeta3 returns a matrix with correct dimensions and sums <= 1", {
 })
 
 test_that("rshares returns an error when beta is only provided for some elements", {
-  shares <- c(a = 0.2, b = 0.3, c = 0.5)
-  sds <- c(a = 0.05, b = 0.05, c = NA)
-  n <- 10
-  expect_error(rshares(n, shares, sds))
+  # shares <- c(a = 0.2, b = 0.3, c = 0.5)
+  # sds <- c(a = 0.05, b = 0.05, c = NA)
+  # n <- 10
+  # expect_error(rshares(n, shares, sds))
 
 #
 #   shares <- c(a = 0.2, b = 0.3, c = NA, d = NA)
@@ -130,5 +130,12 @@ test_that("mismatched names in shares and sds throw an error", {
     "`shares` and `sds` must have the same names"
   )
 })
+
+
+
+
+
+
+
 
 

@@ -8,40 +8,33 @@ rshares(
   n,
   shares,
   sds = NULL,
-  na_action = c("fill", "remove"),
+  na_action = "fill",
   max_iter = 1000,
-  threshold_shares = 0.1,
-  threshold_sd = 0.2,
-  grad_based = FALSE,
+  max_rel_bias = 0.1,
   ...
 )
 }
 \arguments{
-\item{n}{Integer, number of draws.}
+\item{n}{Integer. Sample size.}
 
-\item{shares}{Numeric vector of best-guess means; may contain \code{NA}.}
+\item{shares}{Numeric vector containing a best-guess (mean) values for the shares.
+May contain \code{NA}, which is handled depending on \code{na_action}. Must sum to 1
+after adjustment.}
 
-\item{sds}{Numeric vector of SDs; may contain \code{NA}.}
+\item{sds}{Numeric vector (same length as \code{shares}) for the standard deviations of
+the shares. Can also contain \code{NA}.}
 
-\item{na_action}{\code{"fill"} (default) or \code{"remove"} – only used for full
-NA vectors, exactly as before.}
+\item{na_action}{Character. Either \code{"fill"} (default) to fill \code{NA} shares
+proportionally, or \code{"remove"} to drop them entirely.}
 
-\item{max_iter}{Passed to \code{\link[=rbeta3]{rbeta3()}} (unchanged).}
+\item{max_iter}{Numeric. Used by \code{\link[=rbeta2]{rbeta2()}} if partial Beta sampling is performed
+(not used here unless you modify the source).}
 
-\item{threshold_shares}{Relative deviation tolerated for the mean (10 \%).}
-
-\item{threshold_sd}{Relative deviation tolerated for the SD   (20 \%).}
-
-\item{grad_based, }{...  Forwarded to \code{find_gamma_maxent()} if you
-want to switch to the gradient-based solver there.}
-
-\item{...}{Additional arguments passed on to \code{\link[=rbeta3]{rbeta3()}} or other internal functions.}
+\item{...}{Additional arguments passed on to \code{\link[=rbeta2]{rbeta2()}} or other internal functions.}
 }
 \value{
 A numeric matrix of dimension \code{n} times \code{length(shares)}, with
 each row summing to 1.
-
-A numeric matrix \verb{n × length(shares)}; every row sums to 1.
 }
 \description{
 This function combines different approaches for generating shares (Dirichlet,
@@ -50,15 +43,16 @@ provided by \code{shares} and \code{sds}. All generated vectors sum to 1.
 }
 \details{
 The logic is:
-
-•  If every share has an SD  → generalised Dirichlet
-•  If only means are given   → maximum-entropy Dirichlet
-•  If \emph{nothing} is known     → uniform Dirichlet
-•  Mixed cases               → two-level scheme identical to Python
-
-After sampling it checks how far the empirical mean / SD of every
-column deviates from the targets and issues warnings when the
-tolerances are exceeded.
+\enumerate{
+\item If both mean and SD are available for \strong{all} shares, use \code{\link[=rdirichlet_generalised]{rdirichlet_generalised()}}.
+\item If only mean values (no SDs) are available for \strong{all} shares, use \code{\link[=rdirichlet_maxent]{rdirichlet_maxent()}}.
+\item If partial information in the mean values is present (i.e. there are \code{NA}'s in \code{shares})
+the output depends on \code{na_action}: By default, if \code{na_action} is "fill", any \code{NA} in \code{shares} is replaced
+proportionally so that the new \code{shares} still sum to 1. If \code{na_action} is "remove",
+elements with \code{NA} are dropped.
+\item Otherwise, throw an error if partial information is present (e.g., some but not all
+SDs are defined).
+}
 }
 \examples{
 # Example with no SDs -> uses rdirichlet_maxent
@@ -69,10 +63,7 @@ rshares(5, c(0.1, 0.3, 0.6), c(0.05, 0.07, 0.02))
 
 # 'na_action' example: fill missing shares to sum to 1
 rshares(5, c(NA, 0.2, 0.3) , na_action = "fill")
-
-
-
 }
 \seealso{
-\code{\link[=rdirichlet_generalised]{rdirichlet_generalised()}}, \code{\link[=rdirichlet_maxent]{rdirichlet_maxent()}}, \code{\link[=rbeta3]{rbeta3()}}
+\code{\link[=rdirichlet_generalised]{rdirichlet_generalised()}}, \code{\link[=rdirichlet_maxent]{rdirichlet_maxent()}}, \code{\link[=rbeta2]{rbeta2()}}
 }

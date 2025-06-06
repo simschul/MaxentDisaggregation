@@ -29,7 +29,7 @@ library(ggplot2)
 library(reshape2)
 library(GGally)
 library(truncnorm)  # For the rtruncnorm function
-devtools::load_all()
+
 ```
 
 ## Example: Carbon Footprint of Steel in Vehicle Manufacturing

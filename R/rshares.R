@@ -248,14 +248,19 @@ rdirichlet_standard <- function(n, alpha, threshold = 1e-2) {
 #'   the shares. Can also contain \code{NA}.
 #' @param na_action Character. Either `"fill"` (default) to fill \code{NA} shares
 #'   proportionally, or `"remove"` to drop them entirely.
-#' @param max_iter Numeric. Used by [rbeta3()] if partial Beta sampling is performed
+#' @param max_iter Numeric. Used by [rbeta2()] if partial Beta sampling is performed
 #'   (not used here unless you modify the source).
-#' @param ... Additional arguments passed on to [rbeta3()] or other internal functions.
+#' @param max_rel_bias Numeric scalar in (0, 1).  Maximum *relative* deviation
+#'   that the internal moment–matching routine is allowed to have between the
+#'   requested means in `shares` and the theoretical means implied by the
+#'   fitted (generalised) Dirichlet parameters.  It is computed as
+#'   \code{max(abs(mu_target - mu_fitted) / mu_target)} across all components. Defaults to 0.1.
+#' @param ... Additional arguments passed on to [rbeta2()] or other internal functions.
 #'
 #' @return A numeric matrix of dimension \code{n} times \code{length(shares)}, with
 #'   each row summing to 1.
 #'
-#' @seealso [rdirichlet_generalised()], [rdirichlet_maxent()], [rbeta3()]
+#' @seealso [rdirichlet_generalised()], [rdirichlet_maxent()], [rbeta2()]
 #' @export
 #'
 #' @examples
@@ -305,7 +310,7 @@ rshares <- function(n, shares, sds = NULL,
       n, shares, sds,
       max_rel_bias   = max_rel_bias,
       max_iter_bias_fix = 20,        # <- tweak if needed
-      max_iter_rbeta3   = max_iter
+      max_iter_rbeta2   = max_iter
     )
   }
   return(sample)
@@ -313,7 +318,7 @@ rshares <- function(n, shares, sds = NULL,
 
 # Helper for the nested Dirichlet logic with iterative bias correction
 .rshares_nested <- function(n, shares, sds, max_rel_bias = 0.10,
-                            max_iter_bias_fix = 20, max_iter_rbeta3 = 1e3) {
+                            max_iter_bias_fix = 20, max_iter_rbeta2 = 1e3) {
 
   iter <- 0
   repeat {
@@ -333,11 +338,11 @@ rshares <- function(n, shares, sds = NULL,
 
     ## 1) Components with mean *and* SD  -->  Beta-truncated sampling
     if (any(have_both)) {
-      sample[, have_both] <- rbeta3(
+      sample[, have_both] <- rbeta2(
         n,
         shares = shares[have_both],
         sds    = sds[have_both],
-        max_iter = max_iter_rbeta3
+        max_iter = max_iter_rbeta2
       )
     }
 
@@ -384,7 +389,7 @@ rshares <- function(n, shares, sds = NULL,
 #
 #   repeat{
 #     # sample all shares with both mean + sd
-#     sample[, have_both] <- rbeta3(n, shares = shares[have_both],
+#     sample[, have_both] <- rbeta2(n, shares = shares[have_both],
 #                                   sds = sds[have_both], max_iter = max_iter)
 #     # check possible bias due to rejection
 #     emp_mean <- colMeans(sample[,have_both, drop = FALSE])
@@ -433,8 +438,8 @@ rshares <- function(n, shares, sds = NULL,
 #'
 #' @examples
 #' # Means that sum to less than 1
-#' rbeta3(5, c(0.2, 0.3, 0.4), c(0.05, 0.04, 0.03))
-rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1e2) {
+#' rbeta2(5, c(0.2, 0.3, 0.4), c(0.05, 0.04, 0.03))
+rbeta2 <- function(n, shares, sds, fix = TRUE, max_iter = 1e2) {
   var <- sds^2
   undef_comb <- (shares * (1 - shares)) <= var  # Beta undefined if var > mu*(1-mu)
 

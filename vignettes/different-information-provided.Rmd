@@ -42,7 +42,6 @@ library(MaxentDisaggregation)
 library(ggplot2)
 library(reshape2)
 library(data.table)  # For data manipulation
-devtools::load_all()
 
 N <- 1E4  # Sample size for demonstrations
 ```
