@@ -62,11 +62,11 @@ test_that("rshares returns a matrix with correct dimensions and sums to 1", {
   expect_equal(colnames(result), names(shares))
 })
 
-test_that("rbeta3 returns a matrix with correct dimensions and sums <= 1", {
+test_that("rbeta2 returns a matrix with correct dimensions and sums <= 1", {
   shares <- c(a = 0.2, b = 0.3, c = 0.5)
   sds <- c(a = 0.05, b = 0.05, c = 0.05)
   n <- 10
-  result <- rbeta3(n, shares, sds)
+  result <- rbeta2(n, shares, sds)
   expect_true(is.matrix(result))
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length(shares))
