@@ -145,14 +145,6 @@ sample_shares <- rshares(1000, shares = c(0.1, 0.3, 0.6))
 boxplot(sample_shares)
 ```
 
-### Different scenarios of information available
-
-TODO
-
-
-```{r}
-rdisagg(n = 1000, mean_0 = 100, sd_0 = 5, min = 0, shares = c(0.1, 0.3, 0.6))
-```
 
 
 
