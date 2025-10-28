@@ -31,6 +31,9 @@ research disciplines.
   💡 For the Python Package click here!
 </a>
 
+[![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python)](https://github.com/jakobsarthur/maxent_disaggregation)
+
+
 <!-- ![](images/clipboard-133169665.png) -->
 
 ```mermaid
