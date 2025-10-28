@@ -2,20 +2,11 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 -------------------------------------------------------------------------------
+MaxentDisaggregation **R-package**
+<img align="right" src="https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge" alt="View Python Package">
+---
+
 <!-- MaxentDisaggregation **R-package** <div align="right">[![View Python Package](https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge)](https://github.com/jakobsarthur/maxent_disaggregation)</div> -->
-<table>
-<tr>
-<td>MaxentDisaggregation **R-package**</td>
-<td align="right">
-
-[![View Python Package](https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge)](https://github.com/jakobsarthur/maxent_disaggregation)
-
-</td>
-</tr>
-</table>
-
---
-
 
 ## Installation
 
