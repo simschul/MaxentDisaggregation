@@ -11,7 +11,7 @@
 
 <div align="right">
 
-[![View Python Package](https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge)](https://github.com/jakobsarthur/maxent_disaggregation)
+[![View Python Package](https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge)](https://maxent-disaggregation.readthedocs.io/en/latest/index.html)
 
 </div>
 
