@@ -3,8 +3,7 @@
 
 -------------------------------------------------------------------------------
 <a href="https://github.com/jakobsarthur/maxent_disaggregation">
-  <img align="right" src="https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge" alt="View Python Package">
-</a>
+  <img align="right" src="https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge" alt="View Python Package"></a>
 
 # MaxentDisaggregation **R-package**
 
