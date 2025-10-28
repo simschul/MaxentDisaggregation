@@ -4,9 +4,8 @@
 -------------------------------------------------------------------------------
 MaxentDisaggregation **R-package**
 -------------------------------------------------------------------------------
-A **Python** implementation is available here: [![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python)](https://maxent-disaggregation.readthedocs.io/en/latest/index.html)
+[![View Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python)](https://maxent-disaggregation.readthedocs.io/en/latest/index.html)
 
-[![View Python Package](https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge)](https://github.com/jakobsarthur/maxent_disaggregation)
 
 
 ## Installation
