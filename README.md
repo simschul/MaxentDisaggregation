@@ -7,13 +7,12 @@
   <img align="right" src="https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge" alt="View Python Package"></a>
 # MaxentDisaggregation **R-package**
 -->
+# MaxentDisaggregation **R-package**
+
 <div align="right">
-
 [![View Python Package](https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge)](https://github.com/jakobsarthur/maxent_disaggregation)
-
 </div>
 
-Your text content goes here on the left side
 ## Installation
 
 <!-- badges: start -->
