@@ -27,6 +27,12 @@ disaggregation usually involves splitting one data point into several
 disaggregates using proxy data. It is a common problem in many different
 research disciplines.
 
+```{button-link} https://github.com/jakobsarthur/maxent_disaggregation
+:color: info
+:expand:
+💡 For a **Python** implementation of the package click here!
+```
+
 <!-- ![](images/clipboard-133169665.png) -->
 
 ```mermaid
