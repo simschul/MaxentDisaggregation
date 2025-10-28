@@ -2,7 +2,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 -------------------------------------------------------------------------------
-```MaxentDisaggregation``` R-package
+**MaxentDisaggregation R-package**
 
 A **Python** implementation is available here: [![Python Package](https://img.shields.io/badge/Python-Package-blue?style=for-the-badge&logo=python)](https://maxent-disaggregation.readthedocs.io/en/latest/index.html)
 -------------------------------------------------------------------------------
