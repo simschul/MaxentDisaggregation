@@ -2,9 +2,11 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 -------------------------------------------------------------------------------
-# MaxentDisaggregation **R-package**
-<img align="right" src="https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge" alt="View Python Package">
+<a href="https://github.com/jakobsarthur/maxent_disaggregation">
+  <img align="right" src="https://img.shields.io/badge/View-Python%20Package-informational?style=for-the-badge" alt="View Python Package">
+</a>
 
+# MaxentDisaggregation **R-package**
 
 ## Installation
 
