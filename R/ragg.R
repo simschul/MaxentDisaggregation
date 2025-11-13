@@ -65,12 +65,18 @@ ragg <- function(n, mean = NULL, sd = NULL, min = -Inf, max = Inf, meanlog = NUL
   } else if (!is.null(mean) & !is.null(sd) & min <= 0 & max == Inf & isTRUE(log)) {
     return(rlnorm2(n, mean, sd))
 
-    # Case 3: Truncated Normal
-  } else if (!is.null(mean) & !is.null(sd)) {
+    # Case : Truncated normoal with moment matching (if lower bound = 0 and no upper bound)
+  } else if (!is.null(mean) & !is.null(sd) & min <= 0 & max == Inf & isFALSE(log)) {
     out <- tnorm_params_from_moments(mean, sd)
     mean2 <- out$mu
     sd2 <- out$sigma
     return(rtruncnorm(n, a = min, b = max, mean = mean2, sd = sd2))
+
+    # Case 3: Truncated Normal (without moment matching)
+  } else if (!is.null(mean) & !is.null(sd)) {
+    
+    return(rtruncnorm(n, a = min, b = max, mean = mean, sd = sd))
+
 
     # Case 4: Exponential
   } else if (!is.null(mean) & is.null(sd) & min == 0 & max == Inf) {
