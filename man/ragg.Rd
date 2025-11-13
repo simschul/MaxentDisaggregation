@@ -79,5 +79,5 @@ x5 <- ragg(10, min = 0, max = 10)
 x6 <- ragg(10, meanlog = 0, sdlog = 1)
 }
 \seealso{
-\code{\link[=rnorm]{rnorm()}}, \code{\link[=rlnorm]{rlnorm()}}, \code{\link[=rlnorm2]{rlnorm2()}}, \code{\link[=rtruncnorm]{rtruncnorm()}}, \code{\link[=rexp]{rexp()}}, \code{\link[=runif]{runif()}}
+\code{\link[=rnorm]{rnorm()}}, \code{\link[=rlnorm]{rlnorm()}}, \code{\link[=rlnorm2]{rlnorm2()}}, \code{\link[truncnorm:dtruncnorm]{truncnorm::rtruncnorm()}}, \code{\link[=rexp]{rexp()}}, \code{\link[=runif]{runif()}}
 }

@@ -34,10 +34,10 @@ Defaults to \code{c(0.001, 172)}.}
 \item{shares_lb}{Numeric. Lower bound for shares. Any share below this threshold
 is removed and the remaining shares are re-scaled to sum to 1. Defaults to \code{0}.}
 
-\item{local_opts}{List of local optimization options passed to \code{\link[=nloptr]{nloptr()}}.
+\item{local_opts}{List of local optimization options passed to \code{\link[nloptr:nloptr]{nloptr::nloptr()}}.
 Defaults to \code{list("algorithm"="NLOPT_LD_MMA","xtol_rel"=1.0e-4)}.}
 
-\item{opts}{List of global optimization options for \code{\link[=nloptr]{nloptr()}}. Defaults to
+\item{opts}{List of global optimization options for \code{\link[nloptr:nloptr]{nloptr::nloptr()}}. Defaults to
 \code{list("algorithm"="NLOPT_GN_DIRECT","xtol_rel"=1.0e-4,"maxeval"=1000,"local_opts"=local_opts,"print_level"=0)}.}
 }
 \value{
