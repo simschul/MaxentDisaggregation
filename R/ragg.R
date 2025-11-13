@@ -65,19 +65,14 @@ ragg <- function(n, mean = NULL, sd = NULL, min = -Inf, max = Inf, meanlog = NUL
   } else if (!is.null(mean) & !is.null(sd) & min <= 0 & max == Inf & isTRUE(log)) {
     return(rlnorm2(n, mean, sd))
 
-    # Case : Truncated normoal with moment matching (if lower bound = 0 and no upper bound)
-  } else if (!is.null(mean) & !is.null(sd) & min <= 0 & max == Inf & isFALSE(log)) {
-    out <- tnorm_params_from_moments(mean, sd)
+    # Case 3: Truncated normoal with moment matching (if lower bound = 0 and no upper bound)
+  } else if (!is.null(mean) & !is.null(sd)) {
+    out <- tnorm_ab_params_from_moments(mean, sd, a = min, b = max)
     mean2 <- out$mu
     sd2 <- out$sigma
     return(rtruncnorm(n, a = min, b = max, mean = mean2, sd = sd2))
 
-    # Case 3: Truncated Normal (without moment matching)
-  } else if (!is.null(mean) & !is.null(sd)) {
     
-    return(rtruncnorm(n, a = min, b = max, mean = mean, sd = sd))
-
-
     # Case 4: Exponential
   } else if (!is.null(mean) & is.null(sd) & min == 0 & max == Inf) {
     return(rexp(n, rate = 1 / mean))
@@ -253,3 +248,187 @@ tnorm_params_from_moments <- function(m, s, tol = 1e-12, maxit = 50) {
        iters = k)
 }
 
+
+#' Truncated Normal (general [a,b]) parameters from target mean m and sd s
+#'
+#' Given target moments (m, s) for X = Y | a <= Y <= b, Y ~ Normal(mu, sigma^2),
+#' return (mu, sigma) such that the truncated distribution matches (m, s).
+#' Handles all cases: untruncated, one-sided, and two-sided truncation.
+#'
+#' @param m numeric scalar, target mean of truncated variable X (must be finite)
+#' @param s numeric scalar, target sd of truncated variable X (s > 0, finite)
+#' @param a numeric scalar, lower bound (can be -Inf)
+#' @param b numeric scalar, upper bound (can be  Inf); must have a < b
+#' @param tol absolute tolerance for the residual norm in the 2D solve
+#' @param maxit maximum iterations for the 2D Newton solver
+#' @return list(mu=..., sigma=..., alpha=..., beta=..., method="closed|shift|upper|2d-newton", iters=...)
+#' @export
+tnorm_ab_params_from_moments <- function(m, s, a, b, tol = 1e-10, maxit = 100) {
+  if (!is.finite(m)) stop("m must be finite.")
+  if (!is.finite(s) || s <= 0) stop("s must be finite and strictly positive.")
+  if (!(a < b)) stop("Require a < b.")
+  # Feasibility checks for finite two-sided truncation:
+  if (is.finite(a) && is.finite(b)) {
+    # Mean must lie in [a, b]
+    if (m < a || m > b) {
+      stop("Infeasible: target mean m is outside [a, b].")
+    }
+    # Any distribution on [a,b] has sd <= (b-a)/2 (Popoviciu bound).
+    # Truncated normal is a subset ⇒ necessary condition.
+    max_sd <- (b - a) / 2
+    if (s > max_sd + .Machine$double.eps^0.5) {
+      stop(sprintf("Infeasible: target sd s (%.6g) exceeds max possible on [a,b] (%.6g).",
+                  s, max_sd))
+    }
+  }
+
+  # trivial/untruncated case
+  if (is.infinite(a) && is.infinite(b)) {
+    return(list(mu = m, sigma = s, alpha = -Inf, beta = Inf, method = "closed", iters = 0))
+  }
+
+  # One-sided lower truncation [a, +Inf): shift to 0 and reuse tnorm_params_from_moments
+  if (is.finite(a) && is.infinite(b)) {
+    out <- tnorm_params_from_moments(m - a, s)  # solve for lower trunc at 0
+    return(list(mu = out$mu + a, sigma = out$sigma, alpha = (a - (out$mu + a))/out$sigma,
+                beta = Inf, method = paste0("shift+", out$method), iters = out$iters))
+  }
+
+  # One-sided upper truncation (-Inf, b]: reflect around b to a lower-truncation-at-0 problem
+  if (is.infinite(a) && is.finite(b)) {
+    # Let W = b - X  -> lower truncation at 0 with mean (b - m), same sd
+    out <- tnorm_params_from_moments(b - m, s)
+    # Map back: X = b - W = N(mu_x, sigma^2) truncated above at b
+    mu_x <- b - out$mu
+    sig  <- out$sigma
+    return(list(mu = mu_x, sigma = sig, alpha = -Inf, beta = (b - mu_x)/sig,
+                method = paste0("upper+", out$method), iters = out$iters))
+  }
+
+  # ---- Two-sided truncation [a,b]: 2D solve in (alpha, beta) ----
+  # Helper: numerically stable pieces
+  logspace_sub <- function(logx, logy) { # assumes x>y>0
+    if (logy > logx) stop("logspace_sub: require logx >= logy")
+    logx + log1p(-exp(logy - logx))
+  }
+
+  # Standardized truncated-N(0,1) moments on [alpha, beta]
+  tnorm01_moments <- function(alpha, beta) {
+    # guard: alpha < beta (strict)
+    if (!(alpha < beta)) return(list(ok = FALSE))
+    lPhi_a <- pnorm(alpha, log.p = TRUE)
+    lPhi_b <- pnorm(beta,  log.p = TRUE)
+    # den = Phi(beta) - Phi(alpha), computed in log-space
+    if (lPhi_b <= lPhi_a) return(list(ok = FALSE))  # guard numeric weirdness
+    lden <- logspace_sub(lPhi_b, lPhi_a)
+    den  <- exp(lden)
+
+    la <- dnorm(alpha, log = TRUE);  lb <- dnorm(beta, log = TRUE)
+    phi_a <- exp(la);                phi_b <- exp(lb)
+
+    # eta = E[Z | alpha<=Z<=beta] for Z~N(0,1)
+    eta <- (phi_a - phi_b) / den
+
+    # v = Var[Z | alpha<=Z<=beta]
+    v <- 1 + (alpha * phi_a - beta * phi_b) / den - eta^2
+
+    list(ok = is.finite(eta) && is.finite(v) && v > 0, eta = eta, v = v, den = den,
+         phi_a = phi_a, phi_b = phi_b)
+  }
+
+  # Residuals:
+  # r1 = alpha - (eta + ((a - m) * sqrt(v))/s)
+  # r2 = beta  - (eta + ((b - m) * sqrt(v))/s)
+  residuals <- function(alpha, beta) {
+    mom <- tnorm01_moments(alpha, beta)
+    if (!isTRUE(mom$ok)) return(c(Inf, Inf))
+    rt <- sqrt(mom$v)
+    r1 <- alpha - (mom$eta + ((a - m) * rt) / s)
+    r2 <- beta  - (mom$eta + ((b - m) * rt) / s)
+    c(r1, r2)
+  }
+
+  # Numerical Jacobian (central diff)
+  jacobian <- function(alpha, beta, h = 1e-5) {
+    r0 <- residuals(alpha, beta)
+    # alpha direction
+    rpa <- residuals(alpha + h, beta)
+    rma <- residuals(alpha - h, beta)
+    # beta direction
+    rpb <- residuals(alpha, beta + h)
+    rmb <- residuals(alpha, beta - h)
+    cbind((rpa - rma) / (2 * h), (rpb - rmb) / (2 * h))
+  }
+
+  # Initial guess: "weak truncation" heuristic
+  # Start near standardized (a-m)/s, (b-m)/s
+  alpha <- (a - m) / s
+  beta  <- (b - m) / s
+  # Make sure alpha < beta (strict); nudge if equal
+  if (!(alpha < beta)) {
+    eps <- 1e-3
+    alpha <- alpha - eps
+    beta  <- beta  + eps
+  }
+
+  # Clamp to a numerically safe range for pnorm/dnorm log-space math
+  clamp <- function(x, lo = -37, hi = 37) pmax(lo, pmin(hi, x))
+
+  # Damped Newton
+  iters <- 0
+  for (k in 1:maxit) {
+    iters <- k
+    alpha <- clamp(alpha); beta <- clamp(beta)
+    r  <- residuals(alpha, beta)
+    nr <- sqrt(sum(r * r))
+    if (!is.finite(nr)) break
+    if (nr <= tol) break
+
+    J <- jacobian(alpha, beta)
+    if (!all(is.finite(J))) break
+
+    # Solve J * step = -r
+    step <- tryCatch(solve(J, -r), error = function(e) rep(0, 2))
+    if (!all(is.finite(step))) step <- rep(0, 2)
+
+    # Backtracking line search
+    t <- 1
+    best_alpha <- alpha; best_beta <- beta; best_nr <- nr
+    for (ls in 1:20) {
+      a_try <- alpha + t * step[1]
+      b_try <- beta  + t * step[2]
+      if (a_try >= b_try) { t <- t / 2; next }
+      a_try <- clamp(a_try); b_try <- clamp(b_try)
+      r_try <- residuals(a_try, b_try)
+      nr_try <- sqrt(sum(r_try * r_try))
+      if (is.finite(nr_try) && nr_try < best_nr) {
+        best_alpha <- a_try; best_beta <- b_try; best_nr <- nr_try
+        break
+      }
+      t <- t / 2
+    }
+    # If no improvement, stop
+    if (best_nr >= nr) break
+
+    alpha <- best_alpha; beta <- best_beta
+  }
+
+  # Final check / build parameters
+  mom <- tnorm01_moments(alpha, beta)
+  if (!isTRUE(mom$ok)) {
+    stop("Failed to solve for (mu, sigma) on [a,b]; try different (m,s) or adjust tol/maxit.")
+  }
+  sigma <- s / sqrt(mom$v)
+  mu    <- m - sigma * mom$eta
+
+  if (!is.finite(mu) || !is.finite(sigma) || sigma <= 0) {
+    stop("Solution produced non-finite or non-positive sigma.")
+  }
+
+  list(mu = as.numeric(mu),
+       sigma = as.numeric(sigma),
+       alpha = as.numeric(alpha),
+       beta  = as.numeric(beta),
+       method = "2d-newton",
+       iters = iters)
+}
