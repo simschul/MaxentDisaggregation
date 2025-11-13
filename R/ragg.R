@@ -67,7 +67,10 @@ ragg <- function(n, mean = NULL, sd = NULL, min = -Inf, max = Inf, meanlog = NUL
 
     # Case 3: Truncated Normal
   } else if (!is.null(mean) & !is.null(sd)) {
-    return(rtruncnorm(n, a = min, b = max, mean = mean, sd = sd))
+    out <- tnorm_params_from_moments(mean, sd)
+    mean2 <- out$mu
+    sd2 <- out$sigma
+    return(rtruncnorm(n, a = min, b = max, mean = mean2, sd = sd2))
 
     # Case 4: Exponential
   } else if (!is.null(mean) & is.null(sd) & min == 0 & max == Inf) {
@@ -128,3 +131,119 @@ rlnorm2 <- function(n, mean, sd) {
   r   <- rnorm(n)
   return(exp(sd2 * r + m2))
 }
+
+#' Truncated normal (lower=0) parameters from mean m and sd s
+#'
+#' Given target moments (m, s) of X ~ Normal(mu, sigma^2) truncated at [0, +inf),
+#' return (mu, sigma). Robust and efficient.
+#'
+#' @param m target mean (m > 0)
+#' @param s target standard deviation (s > 0)
+#' @param tol absolute tolerance for root finding
+#' @param maxit maximum iterations for Newton fallback
+#' @return list(mu=..., sigma=..., alpha=..., method="uniroot"|"newton")
+tnorm_params_from_moments <- function(m, s, tol = 1e-12, maxit = 50) {
+  if (!is.finite(m) || !is.finite(s) || m <= 0 || s <= 0) {
+    stop("m and s must be finite and strictly positive.")
+  }
+
+  # Stable inverse Mills ratio: lambda(a) = phi(a) / (1 - Phi(a))
+  lambda <- function(a) {
+    # log phi and log upper tail to avoid under/overflow
+    log_phi <- dnorm(a, log = TRUE)
+    log_tail <- pnorm(a, lower.tail = FALSE, log.p = TRUE)
+    exp(log_phi - log_tail)
+  }
+
+  # Derivative: lambda'(a) = lambda(a) * (lambda(a) - a)
+  lambda_prime <- function(a, lam = NULL) {
+    if (is.null(lam)) lam <- lambda(a)
+    lam * (lam - a)
+  }
+
+  # Root function in alpha (a): g(a) = s^2 (lam - a)^2 - m^2 (1 + a*lam - lam^2)
+  gfun <- function(a) {
+    lam <- lambda(a)
+    s^2 * (lam - a)^2 - m^2 * (1 + a * lam - lam^2)
+  }
+
+  # Derivative g'(a)
+  gprime <- function(a) {
+    lam <- lambda(a)
+    l1  <- lam * (lam - a) # lambda'(a)
+    2 * s^2 * (lam - a) * (l1 - 1) - m^2 * (lam + a * l1 - 2 * lam * l1)
+  }
+
+  # Try to bracket a root for uniroot (safe & fast). Expand symmetrically.
+  # We cap |alpha| to ~37 to stay well within numeric stability of pnorm's log tail.
+  cap <- 37
+  L <- -8; U <- 8
+  gL <- gfun(L); gU <- gfun(U)
+
+  expand_attempts <- 0
+  while (sign(gL) == sign(gU) && expand_attempts < 10) {
+    L <- max(-cap, 2 * L)
+    U <- min( cap, 2 * U)
+    gL <- gfun(L); gU <- gfun(U)
+    if ((L <= -cap && U >= cap)) break
+    expand_attempts <- expand_attempts + 1
+  }
+
+  # If we got a sign change, use uniroot (preferred).
+  if (is.finite(gL) && is.finite(gU) && sign(gL) != sign(gU)) {
+    r <- uniroot(function(a) gfun(a), lower = L, upper = U, tol = tol)
+    a  <- r$root
+    lam <- lambda(a)
+    sigma <- m / (lam - a)
+    mu    <- -a * sigma
+    return(list(mu = as.numeric(mu),
+                sigma = as.numeric(sigma),
+                alpha = as.numeric(a),
+                method = "uniroot",
+                iters = r$iter,
+                bracket = c(L, U)))
+  }
+
+  # Fallback: damped Newton starting from a0 = 0 (half-normal pivot).
+  a <- 0
+  ga <- gfun(a)
+  for (k in 1:maxit) {
+    gpa <- gprime(a)
+    if (!is.finite(ga) || !is.finite(gpa)) break
+    if (gpa == 0) break
+    step <- -ga / gpa
+
+    # Damping if the step doesn't reduce |g|
+    new_a <- a + step
+    new_ga <- gfun(new_a)
+    damp <- 0
+    while ((!is.finite(new_ga) || abs(new_ga) > abs(ga)) && damp < 20) {
+      step <- step / 2
+      new_a <- a + step
+      new_ga <- gfun(new_a)
+      damp <- damp + 1
+    }
+
+    a <- new_a
+    ga <- new_ga
+    if (abs(ga) <= tol) break
+    # Keep alpha within safe numeric range
+    if (a >  cap) a <-  cap
+    if (a < -cap) a <- -cap
+  }
+
+  lam <- lambda(a)
+  sigma <- m / (lam - a)
+  mu    <- -a * sigma
+
+  if (!is.finite(mu) || !is.finite(sigma) || sigma <= 0) {
+    stop("Failed to solve for (mu, sigma). Check inputs (m, s).")
+  }
+
+  list(mu = as.numeric(mu),
+       sigma = as.numeric(sigma),
+       alpha = as.numeric(a),
+       method = "newton",
+       iters = k)
+}
+
