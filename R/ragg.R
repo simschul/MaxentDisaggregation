@@ -249,7 +249,7 @@ tnorm_params_from_moments <- function(m, s, tol = 1e-12, maxit = 50) {
 }
 
 
-#' Truncated Normal (general [a,b]) parameters from target mean m and sd s
+#' Truncated Normal parameters from target mean m and sd s
 #'
 #' Given target moments (m, s) for X = Y | a <= Y <= b, Y ~ Normal(mu, sigma^2),
 #' return (mu, sigma) such that the truncated distribution matches (m, s).
