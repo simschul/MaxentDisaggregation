@@ -108,43 +108,41 @@ tree:
 
 <!-- ![](images/clipboard-1519448807.png) -->
 ```mermaid
-flowchart-elk TD
-    %% Define node classes
-    classDef decision fill:#e28743,color:black,stroke:none;
-    classDef distribution fill:#abdbe3,color:black,stroke:none;
-    classDef notimplementednode fill:#eeeee4,color:black,stroke:none;
-
+lowchart-elk LR
     MeanDecision{{"Best guess/
-    mean available?"}}:::decision
-    SDDecision{{"Standard deviation available?"}}:::decision
-    BoundsDecision1{{"Bounds available?"}}:::decision
-    Uniform("Uniform distribution on [a,b]"):::distribution
-    GoBackToStart["☠️ !Game Over!
-    We suggest to rethink your problem... 🤓"]:::notimplementednode
-    BoundsDecision2{{"Bounds available?"}}:::decision
-    Normal("Normal distribution"):::distribution
-    UnbiasedMean{{"Prefer unbiased mean?"}}:::decision
-    TruncNorm("Truncated Normal 
-    (Maximum Entropy distribution)"):::distribution
-    LogNorm("LogNormal distribution"):::distribution
-    LowerBound0{{"Lower bound = 0?"}}:::decision
-    Exponential("Exponential"):::distribution
-    NotImplemented["Not Implemented"]:::notimplementednode
+    mean available?"}} -- no --> BoundsDecision1{{"Bounds available?"}}
+    MeanDecision -- yes --> SDDecision{{"Standard deviation available?"}}
+    SDDecision -- yes --> BoundsDecision2{{"Bounds available?"}}
+    BoundsDecision2 -- yes --> GeneralBounds{{"General Bounds a,b"}}
+    GeneralBounds -- "no,  $$a=0, b=\infty$$" --> LogNorm("LogNormal distribution
+    or
+    Truncated Normal")
+    GeneralBounds -- yes --> TruncNorm("Truncated Normal 
+    (Maximum Entropy distribution)")
+    BoundsDecision2 -- no --> Normal("Normal distribution")
+    SDDecision -- no --> LowerBound0{{"Lower bound = 0?"}}
+    LowerBound0 -- yes --> Exponential("Exponential distribution")
+    LowerBound0 -- no --> NotImplemented["Not Implemented"]
+    BoundsDecision1 -- yes --> Uniform("Uniform distribution on [a,b]")
+    BoundsDecision1 -- no --> GoBackToStart["☠️ !Game Over!
+    We suggest to rethink your problem... 🤓"]
+     MeanDecision:::decision
+     BoundsDecision1:::decision
+     SDDecision:::decision
+     BoundsDecision2:::decision
+     GeneralBounds:::decision
+     LogNorm:::distribution
+     TruncNorm:::distribution
+     Normal:::distribution
+     LowerBound0:::decision
+     Exponential:::distribution
+     NotImplemented:::notimplementednode
+     Uniform:::distribution
+     GoBackToStart:::notimplementednode
+    classDef decision fill:#e28743,color:black,stroke:none
+    classDef distribution fill:#abdbe3,color:black,stroke:none
+    classDef notimplementednode fill:#eeeee4,color:black,stroke:none
 
-
-    %% Define connections
-    MeanDecision -- "no" --> BoundsDecision1
-    MeanDecision -- "yes" --> SDDecision
-    SDDecision -- "yes" --> BoundsDecision2
-    BoundsDecision2 -- "yes" --> UnbiasedMean
-    UnbiasedMean -- "yes" --> LogNorm
-    UnbiasedMean -- "no" --> TruncNorm
-    BoundsDecision2 -- "no" --> Normal
-    SDDecision -- "no" --> LowerBound0
-    LowerBound0 -- "yes" --> Exponential
-    LowerBound0 -- "no" --> NotImplemented
-    BoundsDecision1 -- "yes" --> Uniform
-    BoundsDecision1 -- "no" --> GoBackToStart
 ```
 
 The shares are sampled from different variants of the Dirichlet
