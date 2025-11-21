@@ -108,7 +108,7 @@ tree:
 
 <!-- ![](images/clipboard-1519448807.png) -->
 ```mermaid
-flowchart-elk LR
+flowchart-elk TD
     MeanDecision{{"Best guess/
     mean available?"}} -- no --> BoundsDecision1{{"Bounds available?"}}
     MeanDecision -- yes --> SDDecision{{"Standard deviation available?"}}
