@@ -30,6 +30,12 @@ proportionally, or \code{"remove"} to drop them entirely.}
 \item{max_iter}{Numeric. Used by \code{\link[=rbeta2]{rbeta2()}} if partial Beta sampling is performed
 (not used here unless you modify the source).}
 
+\item{max_rel_bias}{Numeric scalar in (0, 1).  Maximum \emph{relative} deviation
+that the internal moment–matching routine is allowed to have between the
+requested means in \code{shares} and the theoretical means implied by the
+fitted (generalised) Dirichlet parameters.  It is computed as
+\code{max(abs(mu_target - mu_fitted) / mu_target)} across all components. Defaults to 0.1.}
+
 \item{...}{Additional arguments passed on to \code{\link[=rbeta2]{rbeta2()}} or other internal functions.}
 }
 \value{

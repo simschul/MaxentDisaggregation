@@ -74,18 +74,7 @@ test_that("rbeta2 returns a matrix with correct dimensions and sums <= 1", {
   expect_equal(colnames(result), names(shares))
 })
 
-test_that("rshares returns an error when beta is only provided for some elements", {
-  # shares <- c(a = 0.2, b = 0.3, c = 0.5)
-  # sds <- c(a = 0.05, b = 0.05, c = NA)
-  # n <- 10
-  # expect_error(rshares(n, shares, sds))
 
-#
-#   shares <- c(a = 0.2, b = 0.3, c = NA, d = NA)
-#   sds <- c(a = 0.05, b = 0.05, c = NA, d = NA)
-#   rshares(n, shares, sds)
-
-})
 
 # helper: reproducible draws
 draw <- function(n, shares, sds, ...) {
