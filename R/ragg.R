@@ -135,37 +135,36 @@ rlnorm2 <- function(n, mean, sd) {
 
 #' Maximum-Entropy Truncated Normal Random Generation
 #'
+#' @description
 #' Draws random values from the **maximum-entropy** distribution on the interval
 #' \eqn{[a, b]} subject to a fixed mean and standard deviation on the *truncated*
 #' scale.
 #'
 #' Under the constraints:
-#' \itemize{
-#'   \item support restricted to \eqn{[a, b]} (with \eqn{a \le b}),
-#'   \item target mean \eqn{E[X] = \code{mean}},
-#'   \item target standard deviation \eqn{\mathrm{sd}(X) = \code{sd}},
-#' }
+#'
+#' * support restricted to \eqn{[a, b]} (with \eqn{a \le b}),
+#' * target mean \eqn{E[X] = \code{mean}},
+#' * target standard deviation \eqn{\mathrm{sd}(X) = \code{sd}},
+#'
 #' the maximum-entropy distribution is a Normal law, possibly truncated:
-#' \itemize{
-#'   \item if \code{a = -Inf} and \code{b = Inf}, the solution is the ordinary
-#'     Normal \eqn{X \sim \mathcal{N}(\code{mean}, \code{sd}^2)};
-#'   \item otherwise, the solution is a **truncated normal**, defined by some
-#'     parent Normal \eqn{Y \sim \mathcal{N}(\mu, \sigma^2)} truncated to
-#'     \eqn{[a, b]}, where \eqn{(\mu, \sigma)} are chosen such that the truncated
-#'     distribution has mean \code{mean} and sd \code{sd}.
-#' }
+#'
+#' * if \code{a = -Inf} and \code{b = Inf}, the solution is the ordinary
+#'   Normal \eqn{X \sim \mathcal{N}(\code{mean}, \code{sd}^2)};
+#' * otherwise, the solution is a **truncated normal**, defined by some parent
+#'   Normal \eqn{Y \sim \mathcal{N}(\mu, \sigma^2)} truncated to \eqn{[a, b]},
+#'   where \eqn{(\mu, \sigma)} are chosen such that the truncated distribution
+#'   has mean \code{mean} and sd \code{sd}.
 #'
 #' This function:
-#' \enumerate{
-#'   \item uses \code{\link{tnorm_ab_params_from_moments}} to solve for the
-#'     underlying Gaussian parameters \eqn{(\mu, \sigma)} compatible with
-#'     \code{mean}, \code{sd}, \code{a}, and \code{b};
-#'   \item generates random values using \code{truncnorm::rtruncnorm()} on
-#'     \eqn{[a, b]} with mean \eqn{\mu} and sd \eqn{\sigma};
-#'   \item optionally checks the **empirical** mean and sd of the sample against
-#'     the requested \code{mean} and \code{sd} via \code{.check_sample()}, and
-#'     throws an error if the deviations exceed user-specified thresholds.
-#' }
+#'
+#' 1. uses \code{\link{tnorm_ab_params_from_moments}} to solve for the
+#'    underlying Gaussian parameters \eqn{(\mu, \sigma)} compatible with
+#'    \code{mean}, \code{sd}, \code{a}, and \code{b};
+#' 2. generates random values using \code{truncnorm::rtruncnorm()} on \eqn{[a, b]}
+#'    with mean \eqn{\mu} and sd \eqn{\sigma};
+#' 3. optionally checks the **empirical** mean and sd of the sample against the
+#'    requested \code{mean} and \code{sd} via \code{.check_sample()}, and throws
+#'    an error if the deviations exceed user-specified thresholds.
 #'
 #' In particular, when the requested pair \code{(mean, sd)} is **not feasible**
 #' for any truncated normal on \eqn{[a, b]} (for example, demanding a very large
@@ -190,10 +189,10 @@ rlnorm2 <- function(n, mean, sd) {
 #'   If \code{FALSE}, no post-hoc validation is performed.
 #' @param thr_mean Numeric scalar. Relative tolerance for the sample mean. A
 #'   value of \code{0.10} means that empirical means deviating by more than
-#'   10\% from the target are considered unacceptable (when \code{check = TRUE}).
+#'   10% from the target are considered unacceptable (when \code{check = TRUE}).
 #' @param thr_sd Numeric scalar. Relative tolerance for the sample standard
 #'   deviation. A value of \code{0.20} means that empirical standard deviations
-#'   deviating by more than 20\% from the target are considered unacceptable
+#'   deviating by more than 20% from the target are considered unacceptable
 #'   (when \code{check = TRUE}).
 #'
 #' @return
@@ -208,8 +207,8 @@ rlnorm2 <- function(n, mean, sd) {
 #' function simply calls \code{stats::rnorm(n, mean, sd)}.
 #'
 #' For truncated cases (\code{a > -Inf} or \code{b < Inf}), the internal solver
-#' \code{\link{tnorm_ab_params_from_moments}} solves the nonlinear moment-matching
-#' problem
+#' \code{\link{tnorm_ab_params_from_moments}} solves the nonlinear
+#' moment-matching problem
 #' \deqn{
 #'   X = Y \mid a \le Y \le b, \quad Y \sim \mathcal{N}(\mu,\sigma^2)
 #' }
@@ -230,14 +229,11 @@ rlnorm2 <- function(n, mean, sd) {
 #' truncated normal on the specified interval.
 #'
 #' @seealso
-#' \itemize{
-#'   \item \code{\link{tnorm_ab_params_from_moments}} for the underlying
-#'     parameter solver;
-#'   \item \code{truncnorm::rtruncnorm()} for the truncated normal RNG;
-#'   \item \code{\link{ragg}} for a higher-level random-number generator that
-#'     chooses distributions based on argument combinations;
-#'   \item \code{.check_sample()} for the sample-based validation routine.
-#' }
+#' \code{\link{tnorm_ab_params_from_moments}} for the underlying parameter
+#' solver; \code{truncnorm::rtruncnorm()} for the truncated normal RNG;
+#' \code{\link{ragg}} for a higher-level random-number generator that chooses
+#' distributions based on argument combinations; and \code{.check_sample()} for
+#' the sample-based validation routine.
 #'
 #' @examples
 #' \dontrun{
@@ -258,6 +254,7 @@ rlnorm2 <- function(n, mean, sd) {
 #'   ## 4) Infeasible target: will error (mean too high relative to sd and bounds)
 #'   x4 <- rtruncnorm_maxent(1e4, a = 0, b = 15, mean = 10, sd = 5)
 #' }
+
 rtruncnorm_maxent <- function(n, a = -Inf, b = Inf, mean = 0, sd = 1,
                               check = TRUE,
                               thr_mean = 0.10,
