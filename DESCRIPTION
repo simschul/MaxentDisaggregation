@@ -1,7 +1,7 @@
 Package: MaxentDisaggregation
 Type: Package
 Title: Generate samples of disaggregate flows
-Version: 0.1.4
+Version: 0.1.5
 Author: Simon Schulte, Arthur Jakobs
 Maintainer: Simon Schulte <simschul@proton.me>
 Description: Easy sampling (=random number generation) of disaggregate flows while respecting the accounting identity (=sum of disaggregates must equal sum of aggregate) and accounting for statistical correlations.
